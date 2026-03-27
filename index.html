@@ -105,6 +105,11 @@ input:focus,select:focus{border-color:var(--green)}
 .mtype-chip{flex-shrink:0;padding:5px 11px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s}
 .mtype-chip.active{border-color:var(--green);background:var(--green-dim);color:var(--green)}
 .custom-lbl-wrap{margin-bottom:5px;display:none}
+/* compact mtype bar */
+.mtype-bar{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.mtype-cur{font-size:12px;font-weight:700;color:var(--green);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn-cycle{flex-shrink:0;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;color:var(--muted);font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;white-space:nowrap;transition:all .2s}
+.btn-cycle:hover{border-color:var(--green);color:var(--green)}
 .result-row{display:flex;align-items:stretch;gap:7px;margin-bottom:5px}
 .rbox{flex:1;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 10px;text-align:center}
 .rbox.ready{border-color:var(--green);box-shadow:0 0 12px rgba(74,222,128,.2)}
@@ -317,6 +322,27 @@ tr:hover td{background:rgba(74,222,128,.03)}
       </div>
     </div>
 
+    <div>
+      <div class="section-title">Measurement Types</div>
+      <div class="card">
+        <div class="field-row">
+          <label>Default measurement type</label>
+          <select id="s-default-mtype">
+            <option value="Fruit size">🍅 Fruit size</option>
+            <option value="Leaf width">🌿 Leaf width</option>
+            <option value="Cluster length">🍇 Cluster length</option>
+            <option value="Internode">📐 Internode</option>
+            <option value="Custom">✏️ Custom</option>
+          </select>
+        </div>
+        <div class="field-row" style="margin-bottom:0">
+          <label>Custom label (if Custom selected)</label>
+          <input type="text" id="s-custom-label" placeholder="e.g. pedicel length, fruit width…">
+        </div>
+        <div class="hint" style="margin-top:10px">💡 You can still cycle through all types quickly in the camera view.</div>
+      </div>
+    </div>
+
     <button class="btn-primary" onclick="startSession()">▶ Start Session</button>
     <div style="height:6px"></div>
   </div>
@@ -382,15 +408,11 @@ tr:hover td{background:rgba(74,222,128,.03)}
 
     <div class="instr" id="instr"></div>
 
-    <div class="mtype-row" id="mtype-row" style="display:none">
-      <div class="mtype-chip active" data-type="Fruit size" onclick="selMType(this)">🍅 Fruit</div>
-      <div class="mtype-chip" data-type="Leaf width" onclick="selMType(this)">🌿 Leaf</div>
-      <div class="mtype-chip" data-type="Cluster length" onclick="selMType(this)">🍇 Cluster</div>
-      <div class="mtype-chip" data-type="Internode" onclick="selMType(this)">📐 Internode</div>
-      <div class="mtype-chip" data-type="Custom" onclick="selMType(this)">✏️ Custom</div>
-    </div>
-    <div class="custom-lbl-wrap" id="custom-lbl-wrap">
-      <input type="text" id="custom-lbl" class="pid-input" placeholder="Label (e.g. pedicel length)" style="width:100%">
+    <!-- current mtype indicator + cycle button -->
+    <div class="mtype-bar" id="mtype-bar" style="display:none">
+      <span class="mtype-cur" id="mtype-cur-label">🍅 Fruit size</span>
+      <button class="btn-cycle" onclick="cycleMType()">⟳ Change</button>
+      <input type="text" id="cam-custom-lbl" class="pid-input" placeholder="Label…" style="display:none;flex:1">
     </div>
 
     <div class="result-row">
@@ -405,18 +427,12 @@ tr:hover td{background:rgba(74,222,128,.03)}
       <button class="btn-log" id="btn-log" disabled onclick="logMeasurement()">＋ Log</button>
     </div>
 
-    <!-- distance update row -->
-    <div class="dist-row" id="dist-row">
-      <input type="number" id="cam-dist" value="50" min="5" max="300" class="pid-input"
-        placeholder="Distance to plant (cm)" style="width:100%" oninput="updateDistCalib(this.value)">
-    </div>
-
     <!-- plot/plant navigation -->
     <div class="nav-row">
-      <input type="text" id="cam-plot" class="pid-input" placeholder="Plot" style="max-width:70px">
+      <input type="text" id="cam-plot" class="pid-input" placeholder="Plot" style="max-width:72px">
       <input type="text" id="cam-plant" class="pid-input" placeholder="Plant">
-      <button class="btn-nav plot-btn" onclick="nextPlot()">Next Plot ▶</button>
-      <button class="btn-nav plant-btn" onclick="nextPlant()">Next Plant ▶</button>
+      <button class="btn-nav plot-btn" onclick="nextPlot()">Plot ▶</button>
+      <button class="btn-nav plant-btn" onclick="nextPlant()">Plant ▶</button>
     </div>
   </div>
 </div>
@@ -544,6 +560,9 @@ async function startSession(){
   S.tapRefMm=parseFloat(document.getElementById('tap-ref-mm').value)||17;
   S.distCm=parseFloat(document.getElementById('dist-cm').value)||50;
   S.aiDistCm=parseFloat(document.getElementById('ai-dist-cm').value)||50;
+  S.defaultMType=document.getElementById('s-default-mtype').value;
+  S.defaultCustomLabel=document.getElementById('s-custom-label').value.trim();
+  currentMType=S.defaultMType;
   S.plotId=document.getElementById('s-plot').value.trim()||'1';
   S.startPlantNum=parseInt(document.getElementById('s-plant').value)||1;
   S.plantId=String(S.startPlantNum);
@@ -582,18 +601,12 @@ window.addEventListener('resize',()=>{ if(document.getElementById('screen-camera
 function initCamera(){
   document.getElementById('cam-plot').value=S.plotId;
   document.getElementById('cam-plant').value=S.plantId;
+  currentMType=S.defaultMType||'Fruit size';
+  updateMTypeBar();
   updateHUD();
+  if(S.calibMethod==='dist') applyDistCalib(S.distCm);
+  if(S.calibMethod==='ai') loadDepthModel();
   setMode('calib');
-  if(S.calibMethod==='dist'){
-    document.getElementById('cam-dist').value=S.distCm;
-    document.getElementById('dist-row').style.display='block';
-    applyDistCalib(S.distCm);
-  }
-  if(S.calibMethod==='ai'){
-    document.getElementById('dist-row').style.display='block';
-    document.getElementById('cam-dist').value=S.aiDistCm;
-    loadDepthModel();
-  }
 }
 
 // ══ MODE ════════════════════════════════════════════════
@@ -601,20 +614,17 @@ function setMode(m){
   camMode=m; clearPoints();
   document.getElementById('tab-calib').className='mode-tab'+(m==='calib'?' ac':'');
   document.getElementById('tab-measure').className='mode-tab'+(m==='measure'?' am':'');
-  document.getElementById('mtype-row').style.display=m==='measure'?'flex':'none';
+  document.getElementById('mtype-bar').style.display=m==='measure'?'flex':'none';
   document.getElementById('btn-log').style.display=m==='measure'?'block':'none';
   document.getElementById('rbox-b').style.display=m==='measure'?'block':'none';
   document.getElementById('rl-a').textContent=m==='calib'?'Calibration':currentMType;
-
+  updateMTypeBar();
   const isAutoScan = m==='calib' && S.calibMethod==='auto';
   if(isAutoScan) startAutoScan(); else stopAutoScan();
-
-  // AI depth overlay
   const isAI = S.calibMethod==='ai';
   depthCanvas.classList.toggle('show', isAI && m==='measure');
   document.getElementById('depth-legend').classList.toggle('show', isAI && m==='measure');
   if(isAI && m==='measure') startDepthLoop(); else stopDepthLoop();
-
   updateInstr(); updateResultBox();
 }
 
@@ -933,11 +943,19 @@ function updateCalibBadge(){
 }
 
 // ══ MEASUREMENT TYPE ════════════════════════════════════
-function selMType(el){
-  document.querySelectorAll('.mtype-chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active'); currentMType=el.dataset.type;
-  document.getElementById('custom-lbl-wrap').style.display=currentMType==='Custom'?'block':'none';
-  document.getElementById('rl-a').textContent=currentMType==='Custom'?(document.getElementById('custom-lbl').value||'Custom'):currentMType;
+const MTYPES=['Fruit size','Leaf width','Cluster length','Internode','Custom'];
+function cycleMType(){
+  const idx=MTYPES.indexOf(currentMType);
+  currentMType=MTYPES[(idx+1)%MTYPES.length];
+  updateMTypeBar();
+  document.getElementById('rl-a').textContent=currentMType;
+}
+function updateMTypeBar(){
+  const icons={'Fruit size':'🍅 Fruit size','Leaf width':'🌿 Leaf width','Cluster length':'🍇 Cluster length','Internode':'📐 Internode','Custom':'✏️ Custom'};
+  const lbl=document.getElementById('mtype-cur-label');
+  const inp=document.getElementById('cam-custom-lbl');
+  if(lbl) lbl.textContent=icons[currentMType]||currentMType;
+  if(inp) inp.style.display=currentMType==='Custom'?'block':'none';
 }
 
 // ══ LOG ═════════════════════════════════════════════════
@@ -947,7 +965,9 @@ function logMeasurement(){
     ? getDepthCorrectedMm(measurePts[0],measurePts[1])
     : dist2d(measurePts[0],measurePts[1])/pxPerMm;
   if(!mm) return;
-  const label=currentMType==='Custom'?(document.getElementById('custom-lbl').value.trim()||'Custom'):currentMType;
+  const label=currentMType==='Custom'
+    ? (document.getElementById('cam-custom-lbl').value.trim() || S.defaultCustomLabel || 'Custom')
+    : currentMType;
   measurements.push({
     id:Date.now(),
     plot:document.getElementById('cam-plot').value.trim()||S.plotId,
@@ -956,7 +976,7 @@ function logMeasurement(){
     calibMethod:S.calibMethod, time:new Date().toLocaleTimeString(), date:new Date().toLocaleDateString()
   });
   saveData(); updateDataBadge();
-  showToast('✅ '+mm.toFixed(1)+' mm logged');
+  showToast('✅ '+mm.toFixed(1)+' mm — '+label);
   setTimeout(()=>{ measurePts=[]; document.getElementById('btn-log').disabled=true; updateResultBox(); updateInstr(); redraw(); },700);
 }
 
