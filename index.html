@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GreenMeasure">
+<meta name="theme-color" content="#0d1117">
 <title>GreenMeasure</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
@@ -67,7 +72,7 @@ input:focus,select:focus{border-color:var(--green)}
 .ai-loader-sub{font-size:12px;color:var(--muted);text-align:center;max-width:260px;line-height:1.6}
 .ai-progress-bar{width:220px;height:6px;background:var(--surface2);border-radius:10px;overflow:hidden;border:1px solid var(--border)}
 .ai-progress-fill{height:100%;background:var(--blue);width:0%;transition:width .3s;border-radius:10px}
-.depth-legend{position:absolute;bottom:200px;right:12px;z-index:10;display:none;pointer-events:none}
+.depth-legend{position:absolute;bottom:50px;right:12px;z-index:10;display:none;pointer-events:none}
 .depth-legend.show{display:block}
 .dl-inner{background:rgba(0,0,0,.6);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 10px;font-size:10px;color:var(--muted)}
 .dl-bar{width:12px;height:80px;border-radius:4px;background:linear-gradient(to bottom,#ff4444,#ffaa00,#4444ff);margin:4px auto}
@@ -85,6 +90,10 @@ input:focus,select:focus{border-color:var(--green)}
 .hud-pill-label{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
 .hud-pill-val{font-size:13px;font-weight:700;color:var(--green);white-space:nowrap}
 .hud-pill-val.amber{color:var(--amber)}
+.hud-nav-btn{background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:6px 13px;pointer-events:all;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;transition:all .15s;flex-shrink:0}
+.hud-nav-btn.plot{border-color:rgba(96,165,250,.5);color:var(--blue)}
+.hud-nav-btn.plant{border-color:rgba(74,222,128,.5);color:var(--green)}
+.hud-nav-btn:active{opacity:.6;transform:scale(.95)}
 
 /* calib badge */
 #calib-badge{position:absolute;top:54px;left:50%;transform:translateX(-50%);z-index:10;pointer-events:none;white-space:nowrap}
@@ -93,8 +102,12 @@ input:focus,select:focus{border-color:var(--green)}
 .cdot.ok{background:var(--green);animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-/* bottom panel */
-.cam-bottom{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.93);border-top:1px solid rgba(255,255,255,.08);padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom));z-index:10}
+/* bottom panel — slide-up drawer */
+.cam-bottom{position:absolute;bottom:0;left:0;right:0;background:rgba(10,12,18,.97);border-top:1px solid rgba(255,255,255,.1);border-radius:16px 16px 0 0;padding:0 12px 10px;padding-bottom:calc(10px + env(safe-area-inset-bottom));z-index:10;transform:translateY(calc(100% - 36px));transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.cam-bottom.open{transform:translateY(0)}
+.drawer-handle{display:flex;align-items:center;justify-content:center;height:36px;cursor:pointer;touch-action:none}
+.drawer-handle-bar{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.25);transition:background .2s}
+.cam-bottom.open .drawer-handle-bar{background:rgba(255,255,255,.5)}
 .mode-tabs{display:flex;gap:5px;margin-bottom:6px;background:rgba(255,255,255,.06);border-radius:8px;padding:3px}
 .mode-tab{flex:1;padding:7px 4px;border-radius:6px;border:none;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;cursor:pointer;text-align:center;transition:all .2s;text-transform:uppercase;letter-spacing:.5px}
 .mode-tab.ac{background:var(--amber);color:#0d1117}
@@ -205,6 +218,9 @@ tr:hover td{background:rgba(74,222,128,.03)}
   <div class="setup-header">
     <div class="logo">Green<span>Measure</span></div>
     <div class="tagline">Greenhouse field measurement · v2</div>
+    <div id="pwa-banner" style="display:none;margin-top:12px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--green);cursor:pointer" onclick="installPWA()">
+      📲 Add to Home Screen for fullscreen mode (no browser bar)
+    </div>
   </div>
   <div class="setup-body">
 
@@ -378,14 +394,15 @@ tr:hover td{background:rgba(74,222,128,.03)}
       <div class="hud-pill-label">Plant</div>
       <div class="hud-pill-val" id="hud-plant">—</div>
     </div>
-    <div class="hud-pill">
-      <div class="hud-pill-label">Scale</div>
-      <div class="hud-pill-val amber" id="hud-scale">—</div>
-    </div>
+    <button class="hud-nav-btn plot" onclick="nextPlot()">Plot ▶</button>
+    <button class="hud-nav-btn plant" onclick="nextPlant()">Plant ▶</button>
   </div>
 
-  <!-- bottom panel -->
-  <div class="cam-bottom">
+  <!-- bottom panel - slide-up drawer -->
+  <div class="cam-bottom" id="cam-bottom">
+    <div class="drawer-handle" onclick="toggleDrawer()">
+      <div class="drawer-handle-bar"></div>
+    </div>
     <div class="mode-tabs">
       <button class="mode-tab ac" id="tab-calib" onclick="setMode('calib')">🎯 Calibrate</button>
       <button class="mode-tab" id="tab-measure" onclick="setMode('measure')">📏 Measure</button>
@@ -401,12 +418,6 @@ tr:hover td{background:rgba(74,222,128,.03)}
         <div class="rv am" id="rv-b">—</div>
       </div>
       <button class="btn-log" id="btn-log" disabled onclick="logMeasurement()">＋ Log</button>
-    </div>
-    <div class="nav-row">
-      <input type="text" id="cam-plot" class="pid-input" placeholder="Plot" style="max-width:72px">
-      <input type="text" id="cam-plant" class="pid-input" placeholder="Plant">
-      <button class="btn-nav plot-btn" onclick="nextPlot()">Plot ▶</button>
-      <button class="btn-nav plant-btn" onclick="nextPlant()">Plant ▶</button>
     </div>
   </div>
 </div>
@@ -573,13 +584,12 @@ window.addEventListener('resize',()=>{ if(document.getElementById('screen-camera
 
 // ══ CAMERA INIT ═════════════════════════════════════════
 function initCamera(){
-  document.getElementById('cam-plot').value=S.plotId;
-  document.getElementById('cam-plant').value=S.plantId;
   currentMType=S.defaultMType||'Fruit size';
   updateHUD();
   if(S.calibMethod==='dist') applyDistCalib(S.distCm);
   if(S.calibMethod==='ai') loadDepthModel();
   setMode('calib');
+  openDrawer(); // start open so user sees controls
 }
 
 // ══ MODE ════════════════════════════════════════════════
@@ -596,6 +606,7 @@ function setMode(m){
   depthCanvas.classList.toggle('show', isAI && m==='measure');
   document.getElementById('depth-legend').classList.toggle('show', isAI && m==='measure');
   if(isAI && m==='measure') startDepthLoop(); else stopDepthLoop();
+  if(m==='measure') openDrawer();
   updateInstr(); updateResultBox();
 }
 
@@ -923,46 +934,46 @@ function logMeasurement(){
   const label = currentMType==='Custom' ? (S.defaultCustomLabel||'Custom') : currentMType;
   measurements.push({
     id:Date.now(),
-    plot:document.getElementById('cam-plot').value.trim()||S.plotId,
-    plant:document.getElementById('cam-plant').value.trim()||S.plantId,
+    plot:S.plotId, plant:S.plantId,
     type:label, mm:parseFloat(mm.toFixed(2)), cm:parseFloat((mm/10).toFixed(3)),
     calibMethod:S.calibMethod, time:new Date().toLocaleTimeString(), date:new Date().toLocaleDateString()
   });
   saveData(); updateDataBadge();
   showToast('✅ '+mm.toFixed(1)+' mm — '+label);
-  setTimeout(()=>{ measurePts=[]; document.getElementById('btn-log').disabled=true; updateResultBox(); updateInstr(); redraw(); },700);
+  setTimeout(()=>{ measurePts=[]; document.getElementById('btn-log').disabled=true; updateResultBox(); updateInstr(); redraw(); closeDrawer(); },700);
 }
+
+// ══ DRAWER ══════════════════════════════════════════════
+function toggleDrawer(){ document.getElementById('cam-bottom').classList.toggle('open'); }
+function openDrawer(){ document.getElementById('cam-bottom').classList.add('open'); }
+function closeDrawer(){ document.getElementById('cam-bottom').classList.remove('open'); }
 
 // ══ PLOT / PLANT NAV ════════════════════════════════════
 function nextPlant(){
-  const cur=document.getElementById('cam-plant').value.trim();
-  const n=parseInt(cur); const next=isNaN(n)?cur+'+':String(n+1);
-  S.plantId=next; document.getElementById('cam-plant').value=next;
-  clearPoints(); updateHUD(); showToast('Plant → '+next);
+  const n=parseInt(S.plantId); const next=isNaN(n)?S.plantId+'+':String(n+1);
+  S.plantId=next; clearPoints(); updateHUD(); showToast('Plant → '+next);
 }
 function nextPlot(){
-  const cur=document.getElementById('cam-plot').value.trim();
-  const n=parseInt(cur); const next=isNaN(n)?cur+'+':String(n+1);
+  const n=parseInt(S.plotId); const next=isNaN(n)?S.plotId+'+':String(n+1);
   S.plotId=next; S.plantId=String(S.startPlantNum);
-  document.getElementById('cam-plot').value=next;
-  document.getElementById('cam-plant').value=S.plantId;
   clearPoints(); updateHUD(); showToast('Plot → '+next+' · Plant → '+S.plantId,'amber');
 }
 function openPlotModal(){
-  document.getElementById('m-plot').value=document.getElementById('cam-plot').value;
-  document.getElementById('m-plant').value=document.getElementById('cam-plant').value;
+  document.getElementById('m-plot').value=S.plotId;
+  document.getElementById('m-plant').value=S.plantId;
   document.getElementById('modal-pp').classList.add('show');
 }
 function savePPModal(){
   const pl=document.getElementById('m-plot').value.trim(), pt=document.getElementById('m-plant').value.trim();
-  if(pl){S.plotId=pl;document.getElementById('cam-plot').value=pl;}
-  if(pt){S.plantId=pt;document.getElementById('cam-plant').value=pt;}
+  if(pl) S.plotId=pl;
+  if(pt) S.plantId=pt;
   updateHUD(); closeModal('modal-pp');
 }
 function updateHUD(){
-  document.getElementById('hud-plot').textContent=document.getElementById('cam-plot')?.value||S.plotId;
-  document.getElementById('hud-plant').textContent=document.getElementById('cam-plant')?.value||S.plantId;
-  document.getElementById('hud-scale').textContent=pxPerMm?pxPerMm.toFixed(1)+' px/mm':'—';
+  document.getElementById('hud-plot').textContent=S.plotId||'—';
+  document.getElementById('hud-plant').textContent=S.plantId||'—';
+  // update calib badge scale
+  updateCalibBadge();
 }
 
 // ══ DRAW ════════════════════════════════════════════════
@@ -1116,6 +1127,18 @@ function showToast(msg,type='green'){
   const t=document.getElementById('toast');
   t.textContent=msg;t.className='show '+type;
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.className='',2200);
+}
+
+// ── PWA Install ─────────────────────────────────────────
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById('pwa-banner').style.display='block';
+});
+function installPWA(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; document.getElementById('pwa-banner').style.display='none'; });
 }
 
 // ── RAF loop ────────────────────────────────────────────
