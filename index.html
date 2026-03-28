@@ -65,17 +65,16 @@ input:focus,select:focus{border-color:var(--green)}
 #scan-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:3}
 #depth-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;opacity:0;transition:opacity .4s}
 #depth-canvas.show{opacity:.55}
-/* AI depth loader overlay */
 #ai-loader{position:absolute;inset:0;z-index:20;background:rgba(13,17,23,.88);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px}
 #ai-loader.show{display:flex}
 .ai-loader-title{font-size:16px;font-weight:700;color:var(--blue)}
 .ai-loader-sub{font-size:12px;color:var(--muted);text-align:center;max-width:260px;line-height:1.6}
 .ai-progress-bar{width:220px;height:6px;background:var(--surface2);border-radius:10px;overflow:hidden;border:1px solid var(--border)}
 .ai-progress-fill{height:100%;background:var(--blue);width:0%;transition:width .3s;border-radius:10px}
-.depth-legend{position:absolute;bottom:50px;right:12px;z-index:10;display:none;pointer-events:none}
+.depth-legend{position:absolute;bottom:90px;right:12px;z-index:9;display:none;pointer-events:none}
 .depth-legend.show{display:block}
 .dl-inner{background:rgba(0,0,0,.6);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 10px;font-size:10px;color:var(--muted)}
-.dl-bar{width:12px;height:80px;border-radius:4px;background:linear-gradient(to bottom,#ff4444,#ffaa00,#4444ff);margin:4px auto}
+.dl-bar{width:12px;height:70px;border-radius:4px;background:linear-gradient(to bottom,#ff4444,#ffaa00,#4444ff);margin:4px auto}
 .dl-label{text-align:center;font-size:9px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
@@ -83,53 +82,54 @@ input:focus,select:focus{border-color:var(--green)}
 #tap-layer{position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;z-index:5}
 #scan-highlight{position:absolute;border:2.5px solid var(--amber);border-radius:8px;pointer-events:none;z-index:6;display:none;box-shadow:0 0 16px rgba(251,191,36,.4)}
 #scan-confirm-btn{position:absolute;z-index:11;background:var(--amber);color:#0d1117;border:none;border-radius:20px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;padding:8px 18px;cursor:pointer;display:none;transform:translateX(-50%);white-space:nowrap}
-
-/* HUD top */
-.cam-hud-top{position:absolute;top:0;left:0;right:0;padding:10px 10px;background:linear-gradient(to bottom,rgba(0,0,0,.82) 0%,transparent 100%);display:flex;align-items:center;justify-content:space-between;z-index:10;pointer-events:none;gap:6px}
-.hud-pill{background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:5px 12px;pointer-events:all;cursor:pointer;flex-shrink:0}
+/* ── TOP HUD ── */
+.cam-hud-top{position:absolute;top:0;left:0;right:0;padding:10px;background:linear-gradient(to bottom,rgba(0,0,0,.8) 0%,transparent 100%);display:flex;align-items:center;gap:6px;z-index:10;pointer-events:none}
+.hud-pill{background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:5px 12px;pointer-events:all;cursor:pointer;flex-shrink:0}
 .hud-pill-label{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
 .hud-pill-val{font-size:13px;font-weight:700;color:var(--green);white-space:nowrap}
 .hud-pill-val.amber{color:var(--amber)}
-.hud-nav-btn{background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:6px 13px;pointer-events:all;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;transition:all .15s;flex-shrink:0}
+.hud-nav-btn{background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:7px 14px;pointer-events:all;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;transition:all .15s;flex-shrink:0}
 .hud-nav-btn.plot{border-color:rgba(96,165,250,.5);color:var(--blue)}
 .hud-nav-btn.plant{border-color:rgba(74,222,128,.5);color:var(--green)}
 .hud-nav-btn:active{opacity:.6;transform:scale(.95)}
-
-/* calib badge */
-#calib-badge{position:absolute;top:54px;left:50%;transform:translateX(-50%);z-index:10;pointer-events:none;white-space:nowrap}
+/* ── CALIB BADGE ── */
+#calib-badge{position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:10;pointer-events:none;white-space:nowrap}
 .cbd{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.1)}
 .cdot{width:7px;height:7px;border-radius:50%;background:var(--red);flex-shrink:0}
 .cdot.ok{background:var(--green);animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* bottom panel — slide-up drawer */
-.cam-bottom{position:absolute;bottom:0;left:0;right:0;background:rgba(10,12,18,.97);border-top:1px solid rgba(255,255,255,.1);border-radius:16px 16px 0 0;padding:0 12px 10px;padding-bottom:calc(10px + env(safe-area-inset-bottom));z-index:10;transform:translateY(calc(100% - 36px));transition:transform .3s cubic-bezier(.4,0,.2,1)}
-.cam-bottom.open{transform:translateY(0)}
-.drawer-handle{display:flex;align-items:center;justify-content:center;height:36px;cursor:pointer;touch-action:none}
-.drawer-handle-bar{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.25);transition:background .2s}
-.cam-bottom.open .drawer-handle-bar{background:rgba(255,255,255,.5)}
-.mode-tabs{display:flex;gap:5px;margin-bottom:6px;background:rgba(255,255,255,.06);border-radius:8px;padding:3px}
-.mode-tab{flex:1;padding:7px 4px;border-radius:6px;border:none;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;cursor:pointer;text-align:center;transition:all .2s;text-transform:uppercase;letter-spacing:.5px}
-.mode-tab.ac{background:var(--amber);color:#0d1117}
-.mode-tab.am{background:var(--green);color:#0d1117}
-.instr{text-align:center;font-size:11px;color:rgba(255,255,255,.6);margin-bottom:6px;min-height:15px;line-height:1.3}
-.result-row{display:flex;align-items:stretch;gap:6px;margin-bottom:6px}
-.rbox{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 8px;text-align:center}
+/* ── FIXED ACTION BAR ── */
+.action-bar{position:absolute;bottom:0;left:0;right:0;z-index:12;background:rgba(10,12,18,.97);border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:5px;padding:8px 10px;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+.act-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:7px 4px;border-radius:9px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);font-family:'Outfit',sans-serif;font-size:9px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.act-btn .aico{font-size:20px;line-height:1}
+.act-btn.calib-active{background:var(--amber-dim);border-color:rgba(251,191,36,.5);color:var(--amber)}
+.act-btn.measure-active{background:var(--green-dim);border-color:rgba(74,222,128,.5);color:var(--green)}
+.act-btn.undo-btn{color:var(--red);border-color:rgba(248,113,113,.25)}
+.act-btn:active{opacity:.6;transform:scale(.95)}
+.act-divider{width:1px;height:32px;background:rgba(255,255,255,.1);flex-shrink:0}
+/* ── SLIDE DRAWER ── */
+.cam-drawer{position:absolute;bottom:0;left:0;right:0;z-index:11;background:rgba(10,12,18,.97);border-radius:16px 16px 0 0;border-top:1px solid rgba(255,255,255,.12);transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);padding-bottom:calc(68px + env(safe-area-inset-bottom))}
+.cam-drawer.open{transform:translateY(0)}
+.drawer-handle{display:flex;align-items:center;justify-content:center;height:28px;cursor:pointer}
+.drawer-handle-bar{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2)}
+.drawer-content{padding:2px 14px 14px}
+.drawer-section{margin-bottom:14px}
+.drawer-section-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.result-boxes{display:flex;gap:8px}
+.rbox{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 10px;text-align:center}
 .rbox.ready{border-color:var(--green);box-shadow:0 0 10px rgba(74,222,128,.2)}
 .rbox.cr{border-color:var(--amber);box-shadow:0 0 10px rgba(251,191,36,.2)}
 .rl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-.rv{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--green);margin-top:1px}
-.rv.na{color:var(--muted);font-size:11px}
+.rv{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--green);margin-top:2px}
+.rv.na{color:var(--muted);font-size:12px}
 .rv.am{color:var(--amber)}
-.btn-log{background:var(--green);color:#0d1117;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;padding:8px 14px;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;align-self:stretch}
-.btn-log:disabled{opacity:.3;cursor:not-allowed}
-/* plot/plant nav */
-.nav-row{display:flex;gap:5px;align-items:center}
-.pid-input{flex:1;font-size:13px;padding:7px 8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:var(--text);font-family:'Outfit',sans-serif;outline:none;min-width:0}
-.btn-nav{border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,.06);color:var(--text);font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;padding:7px 10px;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
-.btn-nav.plot-btn{border-color:rgba(96,165,250,.6);color:var(--blue)}
-.btn-nav.plant-btn{border-color:rgba(74,222,128,.6);color:var(--green)}
-.btn-nav:active{opacity:.7}
+.instr{text-align:center;font-size:11px;color:rgba(255,255,255,.5);margin-top:8px;min-height:15px}
+.drawer-nav{display:flex;gap:7px;margin-top:14px}
+.dnav-btn{flex:1;padding:11px 6px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.05);font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;text-align:center;transition:all .2s}
+.dnav-btn:active{opacity:.7}
+.dnav-btn.cam{color:var(--green);border-color:rgba(74,222,128,.4)}
+.dnav-btn.data{color:var(--blue);border-color:rgba(96,165,250,.4)}
+.data-count-badge{display:inline-block;background:var(--amber);color:#0d1117;font-size:9px;font-weight:800;padding:1px 5px;border-radius:10px;margin-left:4px;vertical-align:middle}
 
 /* ── DATA ── */
 #screen-data{background:var(--bg);flex-direction:column;padding-bottom:60px;overflow:hidden}
@@ -359,7 +359,7 @@ tr:hover td{background:rgba(74,222,128,.03)}
   <div id="scan-highlight"></div>
   <button id="scan-confirm-btn" onclick="confirmScanCalib()">✓ Use this</button>
 
-  <!-- AI loader overlay -->
+  <!-- AI loader -->
   <div id="ai-loader">
     <div class="spinner"></div>
     <div class="ai-loader-title">🧠 Loading AI Depth Model</div>
@@ -376,15 +376,12 @@ tr:hover td{background:rgba(74,222,128,.03)}
     </div>
   </div>
 
-  <!-- calib badge -->
+  <!-- Calib badge -->
   <div id="calib-badge">
-    <div class="cbd">
-      <div class="cdot" id="cdot"></div>
-      <span id="cbadge-txt">Not calibrated</span>
-    </div>
+    <div class="cbd"><div class="cdot" id="cdot"></div><span id="cbadge-txt">Not calibrated</span></div>
   </div>
 
-  <!-- top HUD -->
+  <!-- Top HUD: Plot · Plant · Next Plot · Next Plant -->
   <div class="cam-hud-top">
     <div class="hud-pill" onclick="openPlotModal()">
       <div class="hud-pill-label">Plot</div>
@@ -398,29 +395,54 @@ tr:hover td{background:rgba(74,222,128,.03)}
     <button class="hud-nav-btn plant" onclick="nextPlant()">Plant ▶</button>
   </div>
 
-  <!-- bottom panel - slide-up drawer -->
-  <div class="cam-bottom" id="cam-bottom">
+  <!-- Slide-up drawer (info + navigation) -->
+  <div class="cam-drawer" id="cam-drawer">
     <div class="drawer-handle" onclick="toggleDrawer()">
       <div class="drawer-handle-bar"></div>
     </div>
-    <div class="mode-tabs">
-      <button class="mode-tab ac" id="tab-calib" onclick="setMode('calib')">🎯 Calibrate</button>
-      <button class="mode-tab" id="tab-measure" onclick="setMode('measure')">📏 Measure</button>
-    </div>
-    <div class="instr" id="instr"></div>
-    <div class="result-row">
-      <div class="rbox" id="rbox-a">
-        <div class="rl" id="rl-a">Calibration</div>
-        <div class="rv na" id="rv-a">—</div>
+    <div class="drawer-content">
+      <div class="drawer-section">
+        <div class="drawer-section-title">Last measurement</div>
+        <div class="result-boxes">
+          <div class="rbox" id="rbox-a">
+            <div class="rl" id="rl-a">—</div>
+            <div class="rv na" id="rv-a">—</div>
+          </div>
+          <div class="rbox" id="rbox-b">
+            <div class="rl">inches</div>
+            <div class="rv am" id="rv-b">—</div>
+          </div>
+        </div>
+        <div class="instr" id="instr"></div>
       </div>
-      <div class="rbox" id="rbox-b" style="display:none">
-        <div class="rl">inches</div>
-        <div class="rv am" id="rv-b">—</div>
+      <div class="drawer-nav">
+        <button class="dnav-btn cam" onclick="closeDrawer()">📷 Camera</button>
+        <button class="dnav-btn data" onclick="showScreen('data')">📋 Data<span class="data-count-badge" id="data-badge" style="display:none"></span></button>
+        <button class="dnav-btn" onclick="showScreen('setup')">⚙️ Setup</button>
       </div>
-      <button class="btn-log" id="btn-log" disabled onclick="logMeasurement()">＋ Log</button>
     </div>
   </div>
+
+  <!-- Fixed action bar (always visible) -->
+  <div class="action-bar">
+    <button class="act-btn calib-active" id="act-calib" onclick="setMode('calib')">
+      <span class="aico">🎯</span>Calibrate
+    </button>
+    <div class="act-divider"></div>
+    <button class="act-btn" id="act-measure" onclick="setMode('measure')">
+      <span class="aico">📏</span>Measure
+    </button>
+    <div class="act-divider"></div>
+    <button class="act-btn undo-btn" onclick="undoLast()">
+      <span class="aico">↩</span>Undo
+    </button>
+    <div class="act-divider"></div>
+    <button class="act-btn" onclick="toggleDrawer()">
+      <span class="aico">☰</span>More
+    </button>
+  </div>
 </div>
+
 
 <!-- ══ DATA ══ -->
 <div id="screen-data" class="screen">
@@ -560,7 +582,7 @@ async function startSession(){
   };
   }catch(e){ alert('Camera access denied. Please allow camera permission and try again.'); return; }
   showScreen('camera');
-  document.getElementById('nav-bar').style.display='flex';
+  // nav handled by action bar
   updateDataBadge();
 }
 
@@ -568,8 +590,7 @@ async function startSession(){
 function showScreen(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
-  ['camera','data'].forEach(n=>document.getElementById('nb-'+n)?.classList.toggle('active',n===name));
-  if(name==='data') renderTable();
+  if(name==='data'){ renderTable(); closeDrawer(); }
   if(name==='camera') resizeCanvases();
   if(name!=='camera') stopDepthLoop();
 }
@@ -589,16 +610,13 @@ function initCamera(){
   if(S.calibMethod==='dist') applyDistCalib(S.distCm);
   if(S.calibMethod==='ai') loadDepthModel();
   setMode('calib');
-  openDrawer(); // start open so user sees controls
 }
 
 // ══ MODE ════════════════════════════════════════════════
 function setMode(m){
   camMode=m; clearPoints();
-  document.getElementById('tab-calib').className='mode-tab'+(m==='calib'?' ac':'');
-  document.getElementById('tab-measure').className='mode-tab'+(m==='measure'?' am':'');
-  document.getElementById('btn-log').style.display=m==='measure'?'block':'none';
-  document.getElementById('rbox-b').style.display=m==='measure'?'block':'none';
+  document.getElementById('act-calib').className='act-btn'+(m==='calib'?' calib-active':'');
+  document.getElementById('act-measure').className='act-btn'+(m==='measure'?' measure-active':'');
   document.getElementById('rl-a').textContent=m==='calib'?'Calibration':currentMType;
   const isAutoScan = m==='calib' && S.calibMethod==='auto';
   if(isAutoScan) startAutoScan(); else stopAutoScan();
@@ -606,7 +624,6 @@ function setMode(m){
   depthCanvas.classList.toggle('show', isAI && m==='measure');
   document.getElementById('depth-legend').classList.toggle('show', isAI && m==='measure');
   if(isAI && m==='measure') startDepthLoop(); else stopDepthLoop();
-  if(m==='measure') openDrawer();
   updateInstr(); updateResultBox();
 }
 
@@ -867,14 +884,21 @@ function handleTap(e){
     if(calibPts.length<2){ calibPts.push(pt); if(calibPts.length===2){ pxPerMm=dist2d(calibPts[0],calibPts[1])/S.tapRefMm; updateCalibBadge(); updateHUD(); showToast('✅ '+pxPerMm.toFixed(1)+' px/mm'); updateResultBox(); } }
     else calibPts=[getTap(e)];
   } else {
+    // Close drawer on any tap in measure mode
+    if(document.getElementById('cam-drawer').classList.contains('open')){ closeDrawer(); return; }
     const pt=getTap(e);
-    if(measurePts.length<2){ measurePts.push(pt); if(measurePts.length===2){ updateResultBox(); document.getElementById('btn-log').disabled=!pxPerMm; } }
-    else{ measurePts=[getTap(e)]; document.getElementById('btn-log').disabled=true; updateResultBox(); }
+    if(measurePts.length<2){
+      measurePts.push(pt);
+      if(measurePts.length===2){
+        updateResultBox();
+        if(pxPerMm) setTimeout(()=>logMeasurement(), 300); // auto-log after brief show
+      }
+    } else { measurePts=[getTap(e)]; updateResultBox(); }
   }
   updateInstr(); redraw();
 }
 
-function clearPoints(){ calibPts=[]; measurePts=[]; document.getElementById('btn-log').disabled=true; redraw(); }
+function clearPoints(){ calibPts=[]; measurePts=[]; redraw(); }
 
 // ══ DIST CALIBRATION ════════════════════════════════════
 function applyDistCalib(cm){
@@ -939,14 +963,21 @@ function logMeasurement(){
     calibMethod:S.calibMethod, time:new Date().toLocaleTimeString(), date:new Date().toLocaleDateString()
   });
   saveData(); updateDataBadge();
+  openDrawer();
   showToast('✅ '+mm.toFixed(1)+' mm — '+label);
-  setTimeout(()=>{ measurePts=[]; document.getElementById('btn-log').disabled=true; updateResultBox(); updateInstr(); redraw(); closeDrawer(); },700);
+  setTimeout(()=>{ measurePts=[]; updateResultBox(); updateInstr(); redraw(); },600);
 }
 
 // ══ DRAWER ══════════════════════════════════════════════
-function toggleDrawer(){ document.getElementById('cam-bottom').classList.toggle('open'); }
-function openDrawer(){ document.getElementById('cam-bottom').classList.add('open'); }
-function closeDrawer(){ document.getElementById('cam-bottom').classList.remove('open'); }
+function undoLast(){
+  if(!measurements.length){ showToast('Nothing to undo','amber'); return; }
+  const last=measurements.pop();
+  saveData(); updateDataBadge();
+  showToast('↩ Removed: '+last.mm+' mm','amber');
+}
+function toggleDrawer(){ document.getElementById('cam-drawer').classList.toggle('open'); }
+function openDrawer(){ document.getElementById('cam-drawer').classList.add('open'); }
+function closeDrawer(){ document.getElementById('cam-drawer').classList.remove('open'); }
 
 // ══ PLOT / PLANT NAV ════════════════════════════════════
 function nextPlant(){
@@ -1093,8 +1124,12 @@ function clearAll(){
   if(confirm('Clear all '+measurements.length+' measurements? Cannot be undone.')){ measurements=[]; saveData(); updateDataBadge(); renderTable(); }
 }
 function updateDataBadge(){
-  const b=document.getElementById('data-badge');
-  if(measurements.length>0){b.textContent=measurements.length;b.classList.add('show');}else b.classList.remove('show');
+  ['data-badge'].forEach(id=>{
+    const b=document.getElementById(id);
+    if(!b) return;
+    if(measurements.length>0){b.textContent=measurements.length;b.style.display='inline-block';}
+    else b.style.display='none';
+  });
 }
 
 // ══ CSV ═════════════════════════════════════════════════
