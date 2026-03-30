@@ -163,7 +163,7 @@ input:focus,select:focus{border-color:var(--green)}
 .data-header-row2{display:flex;gap:6px;padding:8px 13px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
 
 /* ── DATA ── */
-#screen-data{background:var(--bg);flex-direction:column;padding-bottom:60px;overflow:hidden}
+#screen-data{background:var(--bg);flex-direction:column;overflow:hidden}
 .data-header{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 13px;display:flex;align-items:center;gap:7px;flex-shrink:0;flex-wrap:nowrap}
 .data-header h2{font-size:16px;font-weight:700;flex:1;white-space:nowrap}
 .view-toggle{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0}
@@ -447,7 +447,7 @@ tr:hover td{background:rgba(74,222,128,.03)}
         <div class="instr" id="instr"></div>
       </div>
       <div class="drawer-nav">
-        <button class="dnav-btn cam" onclick="closeDrawer()">📷 Camera</button>
+        <button class="dnav-btn cam" onclick="showScreen('camera')">📷 Camera</button>
         <button class="dnav-btn data" onclick="showScreen('data')">📋 Data<span class="data-count-badge" id="data-badge" style="display:none"></span></button>
         <button class="dnav-btn" onclick="showScreen('setup')">⚙️ Setup</button>
       </div>
@@ -497,7 +497,8 @@ tr:hover td{background:rgba(74,222,128,.03)}
 <!-- ══ DATA ══ -->
 <div id="screen-data" class="screen">
   <div class="data-header">
-    <h2>📋 Data</h2>
+    <button class="btn-icon" onclick="showScreen('camera')" style="font-size:16px;padding:7px 12px">◀</button>
+    <h2 style="flex:1">📋 Data</h2>
     <div class="view-toggle">
       <button class="vbtn active" id="vbtn-flat" onclick="setView('flat')">Flat</button>
       <button class="vbtn" id="vbtn-group" onclick="setView('group')">Grouped</button>
@@ -510,7 +511,7 @@ tr:hover td{background:rgba(74,222,128,.03)}
     <button class="btn-icon red" onclick="deleteAllPhotos()">🗑 Delete Photos</button>
   </div>
   <div class="data-body" id="data-body"></div>
-  <div class="stats-bar" id="stats-bar" style="display:none">
+  <div class="stats-bar" id="stats-bar" style="display:none;flex-shrink:0">
     <div><div class="slbl">Logs</div><div class="sval" id="st-total">0</div></div>
     <div><div class="slbl">Avg mm</div><div class="sval" id="st-avg">—</div></div>
     <div><div class="slbl">Min</div><div class="sval" id="st-min">—</div></div>
@@ -648,8 +649,8 @@ async function startSession(){
 function showScreen(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
-  if(name==='data'){ renderTable(); closeDrawer(); }
-  if(name==='camera') resizeCanvases();
+  if(name==='data'){ renderTable(); updatePhotoActionsVisibility(); closeDrawer(); }
+  if(name==='camera'){ resizeCanvases(); }
   if(name!=='camera') stopDepthLoop();
 }
 
@@ -1033,6 +1034,7 @@ function _doLog(mm, label){
   saveData(); updateDataBadge();
   openDrawer();
   showToast('✅ '+mm.toFixed(1)+' mm — '+label);
+  if(document.getElementById('screen-data').classList.contains('active')) renderTable();
   setTimeout(()=>{ measurePts=[]; updateResultBox(); updateInstr(); redraw(); },600);
 }
 
