@@ -986,13 +986,18 @@ let loupeActive = false;
 let loupePt = null;
 let longPressTimer = null;
 
-const loupeEl = document.getElementById('loupe');
-const loupeCanvas = document.getElementById('loupe-canvas');
-const loupeCtx = loupeCanvas.getContext('2d');
-const loupeLabel = document.getElementById('loupe-label');
-
-loupeCanvas.width = LOUPE_SIZE;
-loupeCanvas.height = LOUPE_SIZE;
+// Loupe elements — initialized lazily after DOM ready
+let loupeEl, loupeCanvas, loupeCtx, loupeLabel;
+function initLoupe(){
+  loupeEl = document.getElementById('loupe');
+  loupeCanvas = document.getElementById('loupe-canvas');
+  loupeLabel = document.getElementById('loupe-label');
+  if(loupeCanvas){
+    loupeCanvas.width = LOUPE_SIZE;
+    loupeCanvas.height = LOUPE_SIZE;
+    loupeCtx = loupeCanvas.getContext('2d');
+  }
+}
 
 function showLoupe(clientX, clientY){
   const rect = tapLayer.getBoundingClientRect();
@@ -1628,6 +1633,7 @@ function installPWA(){
 })();
 
 // ── Boot ────────────────────────────────────────────────
+initLoupe();
 loadStorage();
 updateDataBadge();
 updatePhotoActionsVisibility();
