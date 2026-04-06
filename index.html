@@ -431,12 +431,7 @@ tr:hover td{background:rgba(74,222,128,.03)}
   <canvas id="canvas-overlay"></canvas>
   <div id="tap-layer"></div>
 
-  <!-- Loupe magnifier -->
-  <div id="loupe">
-    <canvas id="loupe-canvas"></canvas>
-    <div id="loupe-crosshair"><div class="loupe-dot"></div></div>
-  </div>
-  <div id="loupe-label"></div>
+
   <div id="scan-highlight"></div>
   <button id="scan-confirm-btn" onclick="confirmScanCalib()">✓ Use this</button>
 
@@ -1081,20 +1076,26 @@ function applyPoint(pt){
 }
 
 // Touch events — loupe on long press, normal tap on quick tap
+// Prevent context menu on long press
+tapLayer.addEventListener('contextmenu', e=>e.preventDefault());
+
 tapLayer.addEventListener('touchstart', e=>{
   e.preventDefault();
   const t = e.touches[0];
+  const startX = t.clientX, startY = t.clientY;
   longPressTimer = setTimeout(()=>{
     loupeActive = true;
-    showLoupe(t.clientX, t.clientY);
-  }, 400);
+    showLoupe(startX, startY);
+  }, 300);
 }, {passive:false});
 
 tapLayer.addEventListener('touchmove', e=>{
   e.preventDefault();
-  clearTimeout(longPressTimer);
-  if(!loupeActive) return;
   const t = e.touches[0];
+  const dx = Math.abs(t.clientX - (loupePt ? loupePt.x + tapLayer.getBoundingClientRect().left : t.clientX));
+  // Cancel long press if moved too far before loupe appeared
+  if(!loupeActive && dx > 10) clearTimeout(longPressTimer);
+  if(!loupeActive) return;
   const rect = tapLayer.getBoundingClientRect();
   loupePt = {x: t.clientX - rect.left, y: t.clientY - rect.top};
   // Update loupe position and image
@@ -1111,19 +1112,22 @@ tapLayer.addEventListener('touchend', e=>{
   e.preventDefault();
   clearTimeout(longPressTimer);
   if(loupeActive){
-    // Commit the point from loupe
     commitLoupePoint();
   } else {
-    // Quick tap — use changedTouches position directly
     const t = e.changedTouches[0];
     const rect = tapLayer.getBoundingClientRect();
     applyPoint({x: t.clientX - rect.left, y: t.clientY - rect.top});
   }
 }, {passive:false});
 
+tapLayer.addEventListener('touchcancel', e=>{
+  clearTimeout(longPressTimer);
+  hideLoupe();
+});
+
 // Mouse fallback for desktop testing
 tapLayer.addEventListener('click', e=>{
-  if(loupeActive) return; // handled by touchend
+  if(loupeActive) return;
   const rect = tapLayer.getBoundingClientRect();
   applyPoint({x: e.clientX - rect.left, y: e.clientY - rect.top});
 });
@@ -1603,7 +1607,11 @@ function installPWA(){
 
 // ── RAF loop ────────────────────────────────────────────
 (function loop(){
-  if(document.getElementById('screen-camera').classList.contains('active')) redraw();
+  if(document.getElementById('screen-camera').classList.contains('active')){
+    redraw();
+    // Keep loupe updated while finger is held
+    if(loupeActive && loupePt) drawLoupe(loupePt.x, loupePt.y);
+  }
   requestAnimationFrame(loop);
 })();
 
@@ -1612,6 +1620,13 @@ loadStorage();
 updateDataBadge();
 updatePhotoActionsVisibility();
 </script>
+<!-- LOUPE — must be direct child of body for position:fixed to work on mobile -->
+<div id="loupe">
+  <canvas id="loupe-canvas"></canvas>
+  <div id="loupe-crosshair"><div class="loupe-dot"></div></div>
+</div>
+<div id="loupe-label"></div>
+
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
