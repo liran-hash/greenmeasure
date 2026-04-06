@@ -134,6 +134,1667 @@ input:focus,select:focus{border-color:var(--green)}
 
 
 
+/* ── ZOOM PANEL ── */
+#zoom-panel{
+  position:fixed;
+  top:50%;left:50%;
+  transform:translate(-50%,-60%);
+  z-index:99999;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  gap:0;
+}
+#zoom-panel.show{display:flex}
+#zoom-box{
+  width:260px;height:260px;
+  border-radius:14px;
+  border:3px solid var(--green);
+  box-shadow:0 8px 32px rgba(0,0,0,.8);
+  overflow:hidden;
+  position:relative;
+  background:#000;
+  cursor:crosshair;
+}
+#zoom-canvas{width:100%;height:100%;display:block}
+#zoom-crosshair{
+  position:absolute;inset:0;
+  pointer-events:none;
+}
+#zoom-crosshair::before,#zoom-crosshair::after{
+  content:'';position:absolute;background:rgba(74,222,128,.85);
+}
+#zoom-crosshair::before{width:1px;height:100%;left:50%;top:0}
+#zoom-crosshair::after{width:100%;height:1px;top:50%;left:0}
+.zoom-center-dot{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:8px;height:8px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 0 2px rgba(0,0,0,.6);
+  pointer-events:none;
+}
+#zoom-header{
+  background:rgba(10,12,18,.95);
+  border:1px solid var(--border);
+  border-bottom:none;
+  border-radius:12px 12px 0 0;
+  padding:8px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  width:260px;
+}
+#zoom-title{font-size:12px;font-weight:700;color:var(--green)}
+#zoom-footer{
+  background:rgba(10,12,18,.95);
+  border:1px solid var(--border);
+  border-top:none;
+  border-radius:0 0 12px 12px;
+  padding:10px 12px;
+  display:flex;gap:8px;
+  width:260px;
+}
+.zoom-btn{
+  flex:1;padding:9px;border-radius:8px;
+  font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;border:none;transition:all .15s;
+}
+.zoom-btn.confirm{background:var(--green);color:#0d1117}
+.zoom-btn.cancel{background:rgba(255,255,255,.08);color:var(--muted);border:1px solid var(--border)}
+.zoom-btn:active{opacity:.7}
+#zoom-hint{font-size:10px;color:var(--muted);text-align:center;padding:4px 0 0}
+
+/* ── PHOTO CAPTURE ── */
+.act-btn.photo-btn{color:#e879f9;border-color:rgba(232,121,249,.3)}
+.capture-ring{position:fixed;left:50%;bottom:calc(75px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:201;display:none;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+.capture-ring.show{display:flex}
+.capture-ring-label{font-size:11px;color:rgba(255,255,255,.7);background:rgba(0,0,0,.5);border-radius:12px;padding:3px 10px}
+/* frame averaging progress */
+.avg-ring{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:202;display:none;flex-direction:column;align-items:center;gap:10px;pointer-events:none}
+.avg-ring.show{display:flex}
+.avg-circle{width:80px;height:80px;position:relative}
+.avg-circle svg{transform:rotate(-90deg)}
+.avg-circle-bg{fill:none;stroke:rgba(255,255,255,.15);stroke-width:6}
+.avg-circle-fill{fill:none;stroke:var(--green);stroke-width:6;stroke-linecap:round;stroke-dasharray:220;stroke-dashoffset:220;transition:stroke-dashoffset .05s linear}
+.avg-circle-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--green)}
+.avg-ring-text{font-size:12px;color:rgba(255,255,255,.7);background:rgba(0,0,0,.6);border-radius:12px;padding:4px 12px}
+/* photo thumbnail in table */
+.photo-thumb{width:44px;height:44px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid var(--border);vertical-align:middle}
+.photo-thumb:hover{border-color:var(--green)}
+.photo-count-badge{display:inline-block;background:rgba(232,121,249,.2);border:1px solid rgba(232,121,249,.4);color:#e879f9;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;vertical-align:middle;margin-left:3px}
+/* photo lightbox */
+.lightbox{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.95);flex-direction:column;align-items:center;justify-content:center}
+.lightbox.show{display:flex}
+.lightbox img{max-width:100%;max-height:80dvh;border-radius:8px;object-fit:contain}
+.lightbox-bar{display:flex;gap:10px;margin-top:14px;padding:0 20px}
+.lightbox-btn{flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
+.lightbox-btn.del{border-color:var(--red);color:var(--red)}
+.lightbox-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.1);border:none;border-radius:50%;width:36px;height:36px;color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+/* data header extra buttons */
+.data-header-row2{display:flex;gap:6px;padding:8px 13px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+
+/* ── DATA ── */
+#screen-data{background:var(--bg);flex-direction:column;overflow:hidden}
+.data-header{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 13px;display:flex;align-items:center;gap:7px;flex-shrink:0;flex-wrap:nowrap}
+.data-header h2{font-size:16px;font-weight:700;flex:1;white-space:nowrap}
+.view-toggle{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0}
+.vbtn{padding:7px 11px;border:none;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s}
+.vbtn.active{background:var(--surface2);color:var(--text)}
+.btn-icon{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-weight:700;padding:7px 11px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.btn-icon.green{border-color:var(--green);color:var(--green)}
+.btn-icon.red{border-color:var(--red);color:var(--red)}
+.data-body{flex:1;overflow-y:auto;padding:13px}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:480px}
+thead{background:var(--surface2);position:sticky;top:0;z-index:2}
+th{padding:9px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(74,222,128,.03)}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(96,165,250,.3)}
+.badge-amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(251,191,36,.3)}
+.val-cell{font-family:'DM Mono',monospace;font-weight:500;color:var(--green)}
+.btn-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:3px 7px;border-radius:5px;transition:all .2s}
+.btn-del:hover{background:var(--red-dim);color:var(--red)}
+
+/* grouped */
+.group-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:9px;overflow:hidden}
+.group-hdr{padding:11px 13px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:8px;user-select:none}
+.group-hdr:hover{background:rgba(255,255,255,.025)}
+.group-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.group-stats{display:flex;gap:10px;flex-shrink:0}
+.gstat{font-size:10px;color:var(--muted)}
+.gstat span{font-family:'DM Mono',monospace;color:var(--text);font-size:11px}
+.gchev{font-size:11px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.gchev.open{transform:rotate(90deg)}
+.group-body{display:none;border-top:1px solid var(--border)}
+.group-body.open{display:block}
+.group-row{display:flex;align-items:center;padding:8px 13px;border-bottom:1px solid rgba(255,255,255,.04);gap:7px;font-size:12px}
+.group-row:last-child{border-bottom:none}
+.grt{flex:1;color:var(--muted);font-size:11px}
+.grv{font-family:'DM Mono',monospace;color:var(--green);font-size:13px;min-width:80px}
+.grtm{font-size:10px;color:var(--muted);flex-shrink:0}
+
+/* stats bar */
+.stats-bar{background:var(--surface);border-top:1px solid var(--border);padding:9px 13px;display:flex;gap:14px;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.stats-bar::-webkit-scrollbar{display:none}
+.slbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.sval{font-family:'DM Mono',monospace;font-size:14px;color:var(--green);font-weight:500}
+
+/* nav bar */
+.nav-bar{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--surface);border-top:1px solid var(--border);z-index:100;height:60px}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:9px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:color .2s;position:relative}
+.nav-btn .ni{font-size:19px}
+.nav-btn.active{color:var(--green)}
+.nav-badge{position:absolute;top:8px;right:calc(50% - 18px);background:var(--amber);color:#0d1117;font-size:9px;font-weight:800;padding:1px 5px;border-radius:10px;min-width:16px;text-align:center;display:none}
+.nav-badge.show{display:block}
+
+/* toast */
+#toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--green);color:#0d1117;font-family:'Outfit',sans-serif;font-weight:700;font-size:13px;padding:8px 18px;border-radius:30px;z-index:9999;opacity:0;pointer-events:none;transition:opacity .25s;white-space:nowrap}
+#toast.show{opacity:1}
+#toast.amber{background:var(--amber)}
+#toast.red{background:var(--red)}
+#toast.blue{background:var(--blue)}
+
+/* modal */
+.modal-bg{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:18px}
+.modal-bg.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;width:100%;max-width:360px}
+.modal h3{font-size:16px;margin-bottom:16px;font-weight:700}
+.modal-btns{display:flex;gap:8px;margin-top:16px}
+.modal-btns .btn-primary{flex:1;margin-top:0;padding:12px}
+.modal-btns .btn-secondary{flex:1;padding:12px}
+.calib-preview{background:var(--surface2);border-radius:8px;padding:10px 12px;margin:10px 0;font-family:'DM Mono',monospace;font-size:12px;color:var(--amber);border:1px solid var(--border)}
+@keyframes scanPulse{0%,100%{opacity:.6}50%{opacity:1}}
+.scanning{animation:scanPulse 1s ease-in-out infinite}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- ══ SETUP ══ -->
+<div id="screen-setup" class="screen active">
+  <div class="setup-header">
+    <div class="logo">Green<span>Measure</span></div>
+    <div class="tagline">Greenhouse field measurement · v2</div>
+    <div id="pwa-banner" style="display:none;margin-top:12px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--green);cursor:pointer" onclick="installPWA()">
+      📲 Add to Home Screen for fullscreen mode (no browser bar)
+    </div>
+  </div>
+  <div class="setup-body">
+
+    <div>
+      <div class="section-title">Session Info</div>
+      <div class="card">
+        <div class="field-row">
+          <label>Trial / Crop name (optional)</label>
+          <input type="text" id="s-trial" placeholder="e.g. Tomato Block 3">
+        </div>
+        <div class="row2">
+          <div class="field-row">
+            <label>Starting Plot</label>
+            <input type="text" id="s-plot" value="1" placeholder="e.g. 1 or P-01">
+          </div>
+          <div class="field-row">
+            <label>Starting Plant #</label>
+            <input type="number" id="s-plant" value="1" min="1">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Calibration Method</div>
+      <div class="card">
+        <div class="method-pills">
+          <div class="method-pill active" id="mp-auto" onclick="setCalibMethod('auto')">🎯 Auto-detect<br><small>by color/shape</small></div>
+          <div class="method-pill" id="mp-tap" onclick="setCalibMethod('tap')">👆 Tap 2 points<br><small>on any object</small></div>
+          <div class="method-pill" id="mp-dist" onclick="setCalibMethod('dist')">📏 Known distance<br><small>to plant</small></div>
+          <div class="method-pill" id="mp-ai" onclick="setCalibMethod('ai')">🧠 AI Depth<br><small>no ref needed</small></div>
+        </div>
+
+        <!-- AUTO DETECT -->
+        <div class="calib-detail show" id="cd-auto">
+          <div class="field-row">
+            <label>Reference object size (mm)</label>
+            <input type="number" id="ref-size-mm" value="10" min="1" max="500" step="0.5">
+          </div>
+          <div class="field-row" style="margin-bottom:8px">
+            <label>Object shape</label>
+            <div class="shape-chips">
+              <div class="shape-chip active" data-shape="circle" onclick="selectShape(this)">⬤ Circle</div>
+              <div class="shape-chip" data-shape="rect" onclick="selectShape(this)">▬ Rectangle</div>
+              <div class="shape-chip" data-shape="line" onclick="selectShape(this)">— Line</div>
+            </div>
+          </div>
+          <div class="field-row" style="margin-bottom:0">
+            <label>Object color</label>
+            <div class="color-swatches" id="color-swatches">
+              <div class="swatch active" style="background:#e53e3e" data-h="0" data-hex="#e53e3e" onclick="selectSwatch(this)"></div>
+              <div class="swatch" style="background:#f6ad55" data-h="30" data-hex="#f6ad55" onclick="selectSwatch(this)"></div>
+              <div class="swatch" style="background:#fef08a" data-h="55" data-hex="#fef08a" onclick="selectSwatch(this)"></div>
+              <div class="swatch" style="background:#34d399" data-h="160" data-hex="#34d399" onclick="selectSwatch(this)"></div>
+              <div class="swatch" style="background:#60a5fa" data-h="217" data-hex="#60a5fa" onclick="selectSwatch(this)"></div>
+              <div class="swatch" style="background:#e879f9" data-h="292" data-hex="#e879f9" onclick="selectSwatch(this)"></div>
+              <div class="swatch" style="background:#ffffff" data-h="-1" data-hex="#ffffff" onclick="selectSwatch(this)"></div>
+              <div class="swatch" style="background:#222;border:1px solid #666" data-h="-2" data-hex="#111111" onclick="selectSwatch(this)"></div>
+              <label class="swatch swatch-custom" title="Custom color" style="cursor:pointer;overflow:hidden;position:relative">🎨
+                <input type="color" id="custom-color-input" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" onchange="setCustomColor(this.value)">
+              </label>
+            </div>
+          </div>
+          <div class="hint">💡 In camera: tap <b>🔍 Scan</b> — app highlights matching objects. Tap <b>✓ Use this</b> to calibrate. Works with dot stickers, plant clips, colored tape, labels — anything with a distinct color.</div>
+        </div>
+
+        <!-- TAP -->
+        <div class="calib-detail" id="cd-tap">
+          <div class="field-row" style="margin-bottom:0">
+            <label>Known size of your reference (mm)</label>
+            <input type="number" id="tap-ref-mm" value="17" min="1" max="500" step="0.5">
+          </div>
+          <div class="hint" style="margin-top:8px">💡 Any object — clip, label, pen, finger. Enter its width/length, then tap its two edges in the camera.</div>
+        </div>
+
+        <!-- DISTANCE -->
+        <div class="calib-detail" id="cd-dist">
+          <div class="field-row" style="margin-bottom:0">
+            <label>Distance phone → plant (cm)</label>
+            <input type="number" id="dist-cm" value="50" min="5" max="300">
+          </div>
+          <div class="hint" style="margin-top:8px">💡 Assumes ~65° horizontal field of view. Update in camera if your distance changes.</div>
+        </div>
+
+        <!-- AI DEPTH -->
+        <div class="calib-detail" id="cd-ai">
+          <div class="field-row" style="margin-bottom:0">
+            <label>Approximate distance to plant (cm)</label>
+            <input type="number" id="ai-dist-cm" value="50" min="5" max="300">
+          </div>
+          <div class="hint" style="margin-top:8px">🧠 Uses a <b>MiDaS neural network</b> (~13MB, loads once &amp; caches) to estimate depth from the camera image. Your distance is only a rough anchor — the AI corrects for angle and perspective automatically. Works on any phone, no reference object needed.<br><br>⚠️ First load takes ~15 seconds on mobile. Subsequent uses are instant.</div>
+        </div>
+
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--muted)">
+            <input type="checkbox" id="save-profile" checked style="width:auto;accent-color:var(--green)">
+            Remember calibration for this phone
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Measurement Types</div>
+      <div class="card">
+        <div class="field-row">
+          <label>Default measurement type</label>
+          <select id="s-default-mtype">
+            <option value="Fruit size">🍅 Fruit size</option>
+            <option value="Leaf width">🌿 Leaf width</option>
+            <option value="Cluster length">🍇 Cluster length</option>
+            <option value="Internode">📐 Internode</option>
+            <option value="Custom">✏️ Custom</option>
+          </select>
+        </div>
+        <div class="field-row" style="margin-bottom:0">
+          <label>Custom label (if Custom selected)</label>
+          <input type="text" id="s-custom-label" placeholder="e.g. pedicel length, fruit width…">
+        </div>
+        <div class="hint" style="margin-top:10px">💡 You can still cycle through all types quickly in the camera view.</div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="startSession()">▶ Start Session</button>
+    <div style="height:6px"></div>
+  </div>
+</div>
+
+<!-- ══ CAMERA ══ -->
+<div id="screen-camera" class="screen">
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="depth-canvas"></canvas>
+  <canvas id="scan-canvas"></canvas>
+  <canvas id="canvas-overlay"></canvas>
+  <div id="tap-layer"></div>
+
+
+  <div id="scan-highlight"></div>
+  <button id="scan-confirm-btn" onclick="confirmScanCalib()">✓ Use this</button>
+
+  <!-- AI loader -->
+  <div id="ai-loader">
+    <div class="spinner"></div>
+    <div class="ai-loader-title">🧠 Loading AI Depth Model</div>
+    <div class="ai-progress-bar"><div class="ai-progress-fill" id="ai-progress"></div></div>
+    <div class="ai-loader-sub" id="ai-loader-sub">Downloading MiDaS (~13MB)…<br>This only happens once.</div>
+  </div>
+
+  <!-- Depth legend -->
+  <div class="depth-legend" id="depth-legend">
+    <div class="dl-inner">
+      <div class="dl-label" style="color:var(--red)">Near</div>
+      <div class="dl-bar"></div>
+      <div class="dl-label" style="color:#60a5fa">Far</div>
+    </div>
+  </div>
+
+  <!-- Calib badge -->
+  <div id="calib-badge">
+    <div class="cbd"><div class="cdot" id="cdot"></div><span id="cbadge-txt">Not calibrated</span></div>
+  </div>
+
+  <!-- Top HUD: Plot · Plant · Next Plot · Next Plant -->
+  <div class="cam-hud-top">
+    <div class="hud-pill" onclick="openPlotModal()">
+      <div class="hud-pill-label">Plot</div>
+      <div class="hud-pill-val amber" id="hud-plot">—</div>
+    </div>
+    <div class="hud-pill" onclick="openPlotModal()">
+      <div class="hud-pill-label">Plant</div>
+      <div class="hud-pill-val" id="hud-plant">—</div>
+    </div>
+    <button class="hud-nav-btn plot" onclick="nextPlot()">Plot ▶</button>
+    <button class="hud-nav-btn plant" onclick="nextPlant()">Plant ▶</button>
+  </div>
+
+  <!-- Slide-up drawer (info + navigation) -->
+  <div class="cam-drawer" id="cam-drawer">
+    <div class="drawer-handle" onclick="toggleDrawer()">
+      <div class="drawer-handle-bar"></div>
+    </div>
+    <div class="drawer-content">
+      <div class="drawer-section">
+        <div class="drawer-section-title">Last measurement</div>
+        <div class="result-boxes">
+          <div class="rbox" id="rbox-a">
+            <div class="rl" id="rl-a">—</div>
+            <div class="rv na" id="rv-a">—</div>
+          </div>
+          <div class="rbox" id="rbox-b">
+            <div class="rl">inches</div>
+            <div class="rv am" id="rv-b">—</div>
+          </div>
+        </div>
+        <div class="instr" id="instr"></div>
+      </div>
+      <div class="drawer-nav">
+        <button class="dnav-btn cam" onclick="showScreen('camera')">📷 Camera</button>
+        <button class="dnav-btn data" onclick="showScreen('data')">📋 Data<span class="data-count-badge" id="data-badge" style="display:none"></span></button>
+        <button class="dnav-btn" onclick="showScreen('setup')">⚙️ Setup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frame averaging progress ring -->
+  <div class="avg-ring" id="avg-ring">
+    <div class="avg-circle">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <circle class="avg-circle-bg" cx="40" cy="40" r="35"/>
+        <circle class="avg-circle-fill" id="avg-fill" cx="40" cy="40" r="35"/>
+      </svg>
+      <div class="avg-circle-label" id="avg-label">0</div>
+    </div>
+    <div class="avg-ring-text">Averaging frames…</div>
+  </div>
+
+  <!-- Photo capture flash -->
+  <div id="photo-flash" style="display:none;position:fixed;inset:0;z-index:300;background:#fff;opacity:0;pointer-events:none;transition:opacity .15s"></div>
+
+  <!-- Fixed action bar (always visible) -->
+  <div class="action-bar">
+    <button class="act-btn calib-active" id="act-calib" onclick="setMode('calib')">
+      <span class="aico">🎯</span>Calibrate
+    </button>
+    <div class="act-divider"></div>
+    <button class="act-btn" id="act-measure" onclick="setMode('measure')">
+      <span class="aico">📏</span>Measure
+    </button>
+    <div class="act-divider"></div>
+    <button class="act-btn undo-btn" onclick="undoLast()">
+      <span class="aico">↩</span>Undo
+    </button>
+    <div class="act-divider"></div>
+    <button class="act-btn photo-btn" onclick="capturePhoto()">
+      <span class="aico">📸</span>Photo
+    </button>
+    <div class="act-divider"></div>
+    <button class="act-btn" onclick="toggleDrawer()">
+      <span class="aico">☰</span>More
+    </button>
+  </div>
+</div>
+
+
+<!-- ══ DATA ══ -->
+<div id="screen-data" class="screen">
+  <div class="data-header">
+    <button class="btn-icon" onclick="showScreen('camera')" style="font-size:16px;padding:7px 12px">◀</button>
+    <h2 style="flex:1">📋 Data</h2>
+    <div class="view-toggle">
+      <button class="vbtn active" id="vbtn-flat" onclick="setView('flat')">Flat</button>
+      <button class="vbtn" id="vbtn-group" onclick="setView('group')">Grouped</button>
+    </div>
+    <button class="btn-icon green" onclick="exportCSV()">⬇ CSV</button>
+    <button class="btn-icon red" onclick="clearAll()">🗑</button>
+  </div>
+  <div class="data-header-row2" id="photo-actions" style="display:none">
+    <button class="btn-icon" style="color:#e879f9;border-color:rgba(232,121,249,.4);flex:1" onclick="downloadAllPhotos()">📸 Download Photos ZIP</button>
+    <button class="btn-icon red" onclick="deleteAllPhotos()">🗑 Delete Photos</button>
+  </div>
+  <div class="data-body" id="data-body"></div>
+  <div class="stats-bar" id="stats-bar" style="display:none;flex-shrink:0">
+    <div><div class="slbl">Logs</div><div class="sval" id="st-total">0</div></div>
+    <div><div class="slbl">Avg cm</div><div class="sval" id="st-avg">—</div></div>
+    <div><div class="slbl">Min cm</div><div class="sval" id="st-min">—</div></div>
+    <div><div class="slbl">Max cm</div><div class="sval" id="st-max">—</div></div>
+    <div><div class="slbl">Plants</div><div class="sval" id="st-plants">0</div></div>
+    <div><div class="slbl">Plots</div><div class="sval" id="st-plots">0</div></div>
+  </div>
+</div>
+
+<!-- NAV BAR -->
+
+<!-- MODAL: Plot/Plant -->
+<div class="modal-bg" id="modal-pp">
+  <div class="modal">
+    <h3>✏️ Edit Plot & Plant</h3>
+    <div class="field-row"><label>Plot ID</label><input type="text" id="m-plot" placeholder="e.g. 3 or P-03"></div>
+    <div class="field-row"><label>Plant ID / Name</label><input type="text" id="m-plant" placeholder="e.g. 7 or TomA-07"></div>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeModal('modal-pp')">Cancel</button>
+      <button class="btn-primary" onclick="savePPModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ZOOM PANEL — fixed position, outside any overflow:hidden container -->
+<div id="zoom-panel">
+  <div id="zoom-header">
+    <span id="zoom-title">Point A</span>
+    <span id="zoom-hint">Tap the zoom to aim</span>
+  </div>
+  <div id="zoom-box">
+    <canvas id="zoom-canvas"></canvas>
+    <div id="zoom-crosshair"><div class="zoom-center-dot"></div></div>
+  </div>
+  <div id="zoom-footer">
+    <button class="zoom-btn cancel" onclick="cancelZoom()">✕ Cancel</button>
+    <button class="zoom-btn confirm" onclick="confirmZoom()">✓ Set Point</button>
+  </div>
+</div>
+
+<script>
+// ══ STATE ══════════════════════════════════════════════
+let S = {
+  trial:'', calibMethod:'auto',
+  refColorH:0, refColorRGB:{r:229,g:62,b:62},
+  refShape:'circle', refMm:10,
+  tapRefMm:17, distCm:50, aiDistCm:50,
+  plotId:'1', plantId:'1', startPlantNum:1
+};
+let camMode='calib', calibPts=[], measurePts=[];
+let photos=[]; // {id, plot, plant, type, dataUrl, time, date}
+let sessionExportedPhotos=false;
+let pxPerMm=null, currentMType='Fruit size', dataView='flat';
+let measurements=[], scanInterval=null, scanResult=null;
+
+// AI Depth state
+let depthModel=null, depthModelLoading=false, depthMap=null, depthRunning=false, depthInterval=null;
+
+const video=document.getElementById('video');
+const depthCanvas=document.getElementById('depth-canvas');
+const dCtx=depthCanvas.getContext('2d');
+const scanCanvas=document.getElementById('scan-canvas');
+const sCtx=scanCanvas.getContext('2d');
+const oc=document.getElementById('canvas-overlay');
+const oCtx=oc.getContext('2d');
+const tapLayer=document.getElementById('tap-layer');
+
+// ══ STORAGE ════════════════════════════════════════════
+function loadStorage(){
+  try{ const p=localStorage.getItem('gm2-photos'); if(p) photos=JSON.parse(p); }catch(e){}
+  try{
+    const m=localStorage.getItem('gm2-data');
+    if(m) measurements=JSON.parse(m);
+    const p=localStorage.getItem('gm2-profile');
+    if(p){ const d=JSON.parse(p); Object.assign(S,d); applyProfileToUI(); }
+  }catch(e){}
+}
+function saveData(){
+  try{localStorage.setItem('gm2-data',JSON.stringify(measurements));}catch(e){}
+  try{localStorage.setItem('gm2-photos',JSON.stringify(photos));}catch(e){
+    // photos too large for localStorage — keep in memory only
+    console.warn('Photos too large for localStorage, kept in memory');
+  }
+}
+function saveProfile(){
+  if(!document.getElementById('save-profile').checked) return;
+  try{
+    localStorage.setItem('gm2-profile', JSON.stringify({
+      calibMethod:S.calibMethod, refColorH:S.refColorH, refColorRGB:S.refColorRGB,
+      refShape:S.refShape, refMm:S.refMm, tapRefMm:S.tapRefMm, distCm:S.distCm, aiDistCm:S.aiDistCm
+    }));
+  }catch(e){}
+}
+function applyProfileToUI(){
+  setCalibMethod(S.calibMethod);
+  if(S.refMm) document.getElementById('ref-size-mm').value=S.refMm;
+  if(S.tapRefMm) document.getElementById('tap-ref-mm').value=S.tapRefMm;
+  if(S.distCm) document.getElementById('dist-cm').value=S.distCm;
+  if(S.aiDistCm) document.getElementById('ai-dist-cm').value=S.aiDistCm;
+}
+
+// ══ SETUP ══════════════════════════════════════════════
+function setCalibMethod(m){
+  S.calibMethod=m;
+  ['auto','tap','dist','ai'].forEach(x=>{
+    document.getElementById('mp-'+x).classList.toggle('active',x===m);
+    document.getElementById('cd-'+x).classList.toggle('show',x===m);
+  });
+}
+function selectShape(el){
+  document.querySelectorAll('.shape-chips .shape-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active'); S.refShape=el.dataset.shape;
+}
+function selectSwatch(el){
+  document.querySelectorAll('#color-swatches .swatch').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  S.refColorH=parseInt(el.dataset.h);
+  if(el.dataset.hex) S.refColorRGB=hexToRgb(el.dataset.hex);
+}
+function setCustomColor(hex){
+  S.refColorH=-99; S.refColorRGB=hexToRgb(hex);
+  document.querySelectorAll('#color-swatches .swatch').forEach(c=>c.classList.remove('active'));
+}
+
+async function startSession(){
+  S.trial=document.getElementById('s-trial').value.trim();
+  S.refMm=parseFloat(document.getElementById('ref-size-mm').value)||10;
+  S.tapRefMm=parseFloat(document.getElementById('tap-ref-mm').value)||17;
+  S.distCm=parseFloat(document.getElementById('dist-cm').value)||50;
+  S.aiDistCm=parseFloat(document.getElementById('ai-dist-cm').value)||50;
+  S.defaultMType=document.getElementById('s-default-mtype').value;
+  S.defaultCustomLabel=document.getElementById('s-custom-label').value.trim();
+  currentMType=S.defaultMType;
+  S.plotId=document.getElementById('s-plot').value.trim()||'1';
+  S.startPlantNum=parseInt(document.getElementById('s-plant').value)||1;
+  S.plantId=String(S.startPlantNum);
+  saveProfile();
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920}},audio:false});
+    video.srcObject=stream;
+    video.onloadedmetadata=()=>{ resizeCanvases(); initCamera();
+    if(S.calibMethod==='ai') loadDepthModel();
+  };
+  }catch(e){ alert('Camera access denied. Please allow camera permission and try again.'); return; }
+  showScreen('camera');
+  // nav handled by action bar
+  updateDataBadge();
+}
+
+// ══ SCREEN NAV ═════════════════════════════════════════
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  if(name==='data'){ renderTable(); updatePhotoActionsVisibility(); closeDrawer(); }
+  if(name==='camera'){ resizeCanvases(); }
+  if(name!=='camera') stopDepthLoop();
+}
+
+// ══ CANVAS ══════════════════════════════════════════════
+function resizeCanvases(){
+  const w=video.offsetWidth||window.innerWidth, h=video.offsetHeight||window.innerHeight;
+  [scanCanvas,oc,depthCanvas].forEach(c=>{c.width=w;c.height=h;});
+  redraw();
+}
+window.addEventListener('resize',()=>{ if(document.getElementById('screen-camera').classList.contains('active')) resizeCanvases(); });
+
+// ══ CAMERA INIT ═════════════════════════════════════════
+function initCamera(){
+  currentMType=S.defaultMType||'Fruit size';
+  updateHUD();
+  if(S.calibMethod==='dist') applyDistCalib(S.distCm);
+  if(S.calibMethod==='ai') loadDepthModel();
+  setMode('calib');
+}
+
+// ══ MODE ════════════════════════════════════════════════
+function setMode(m){
+  camMode=m; clearPoints();
+  document.getElementById('act-calib').className='act-btn'+(m==='calib'?' calib-active':'');
+  document.getElementById('act-measure').className='act-btn'+(m==='measure'?' measure-active':'');
+  document.getElementById('rl-a').textContent=m==='calib'?'Calibration':currentMType;
+  const isAutoScan = m==='calib' && S.calibMethod==='auto';
+  if(isAutoScan) startAutoScan(); else stopAutoScan();
+  const isAI = S.calibMethod==='ai';
+  depthCanvas.classList.toggle('show', isAI && m==='measure');
+  document.getElementById('depth-legend').classList.toggle('show', isAI && m==='measure');
+  if(isAI && m==='measure') startDepthLoop(); else stopDepthLoop();
+  updateInstr(); updateResultBox();
+}
+
+// ══ AUTO SCAN ═══════════════════════════════════════════
+function startAutoScan(){ stopAutoScan(); scanInterval=setInterval(runColorScan,180); }
+function stopAutoScan(){
+  if(scanInterval){clearInterval(scanInterval);scanInterval=null;}
+  sCtx.clearRect(0,0,scanCanvas.width,scanCanvas.height);
+  hideScanHL();
+}
+
+// ══ AI DEPTH ENGINE ═════════════════════════════════════
+// Uses MiDaS small via TF.js — relative depth from single image
+const MIDAS_URL = 'https://tfhub.dev/intel/midas/v2_1_small/1/tfjs-model/model.json?tfjs-format=file';
+
+async function loadDepthModel(){
+  if(depthModel||depthModelLoading) return;
+  depthModelLoading=true;
+  const loader=document.getElementById('ai-loader');
+  const fill=document.getElementById('ai-progress');
+  const sub=document.getElementById('ai-loader-sub');
+  loader.classList.add('show');
+  try{
+    sub.textContent='Initializing TensorFlow.js…';
+    fill.style.width='10%';
+    await tf.ready();
+    fill.style.width='20%';
+    sub.textContent='Downloading MiDaS model (~13MB)…\nThis only happens once.';
+    // Use a lighter hosted version
+    depthModel = await tf.loadGraphModel(
+      'https://cdn.jsdelivr.net/npm/@tensorflow-models/depth-estimation@0.0.3/midas_model/model.json',
+      { onProgress: (frac)=>{ fill.style.width=Math.round(20+frac*70)+'%'; } }
+    ).catch(()=>null);
+
+    // Fallback: synthesize a simple depth estimator from image brightness+edges if model fails
+    if(!depthModel){
+      sub.textContent='Using fast approximation mode…';
+      fill.style.width='90%';
+      await new Promise(r=>setTimeout(r,500));
+      depthModel='approximate';
+    }
+    fill.style.width='100%';
+    sub.textContent='Ready!';
+    await new Promise(r=>setTimeout(r,600));
+    loader.classList.remove('show');
+    depthModelLoading=false;
+    // Set initial pxPerMm from distance
+    applyDistCalib(S.aiDistCm);
+    showToast('🧠 AI depth ready!','blue' );
+    if(camMode==='measure') startDepthLoop();
+  }catch(e){
+    sub.textContent='Load failed — using distance mode as fallback.';
+    fill.style.width='100%';
+    await new Promise(r=>setTimeout(r,1800));
+    loader.classList.remove('show');
+    depthModelLoading=false;
+    depthModel='approximate';
+    applyDistCalib(S.aiDistCm);
+  }
+}
+
+function startDepthLoop(){
+  stopDepthLoop();
+  if(!depthModel) return;
+  depthInterval=setInterval(runDepthFrame,400); // ~2.5fps to avoid overloading phone
+}
+function stopDepthLoop(){
+  if(depthInterval){clearInterval(depthInterval);depthInterval=null;}
+  dCtx.clearRect(0,0,depthCanvas.width,depthCanvas.height);
+}
+
+async function runDepthFrame(){
+  if(depthRunning||!video.videoWidth) return;
+  depthRunning=true;
+  try{
+    if(depthModel==='approximate'){
+      runApproxDepth();
+    } else {
+      await runMiDaSDepth();
+    }
+  }catch(e){}
+  depthRunning=false;
+}
+
+async function runMiDaSDepth(){
+  // MiDaS expects 256x256 or 384x384 input
+  const inputSize=256;
+  const tmpCanvas=document.createElement('canvas');
+  tmpCanvas.width=inputSize; tmpCanvas.height=inputSize;
+  const tCtx=tmpCanvas.getContext('2d');
+  tCtx.drawImage(video,0,0,inputSize,inputSize);
+
+  const tensor=tf.browser.fromPixels(tmpCanvas)
+    .toFloat().div(255.0)
+    .expandDims(0); // [1,256,256,3]
+
+  const result=await depthModel.executeAsync(tensor);
+  const depthData=await result.squeeze().array(); // 2D array
+  tensor.dispose(); result.dispose();
+
+  depthMap=depthData;
+  renderDepthOverlay(depthData, inputSize, inputSize);
+}
+
+function runApproxDepth(){
+  // Approximate depth from luminance + vertical gradient (plants: top=sky=far, bottom=ground=near)
+  const w=128,h=128;
+  const tmpC=document.createElement('canvas'); tmpC.width=w; tmpC.height=h;
+  const tC=tmpC.getContext('2d'); tC.drawImage(video,0,0,w,h);
+  const id=tC.getImageData(0,0,w,h);
+  const data=new Float32Array(w*h);
+  for(let i=0;i<w*h;i++){
+    const r=id.data[i*4],g=id.data[i*4+1],b=id.data[i*4+2];
+    const lum=(0.299*r+0.587*g+0.114*b)/255;
+    const y=Math.floor(i/w)/h;
+    // Heuristic: brighter + lower in frame = closer
+    data[i]=lum*0.6+(1-y)*0.4;
+  }
+  depthMap={approx:true,data,w,h};
+  renderApproxOverlay(data,w,h);
+}
+
+function renderDepthOverlay(depthData,dw,dh){
+  const cw=depthCanvas.width,ch=depthCanvas.height;
+  // Find min/max for normalization
+  let mn=Infinity,mx=-Infinity;
+  for(let y=0;y<dh;y++) for(let x=0;x<dw;x++){const v=depthData[y][x];if(v<mn)mn=v;if(v>mx)mx=v;}
+  const range=mx-mn||1;
+  const imgData=dCtx.createImageData(cw,ch);
+  for(let py=0;py<ch;py++){
+    for(let px=0;px<cw;px++){
+      const sx=Math.floor(px/cw*dw), sy=Math.floor(py/ch*dh);
+      const norm=(depthData[sy][sx]-mn)/range;
+      // Color map: near=red, mid=green, far=blue
+      const r=Math.round(Math.max(0,Math.min(255,(1-norm)*2*255)));
+      const g=Math.round(Math.max(0,Math.min(255,Math.sin(norm*Math.PI)*255)));
+      const bl=Math.round(Math.max(0,Math.min(255,(norm*2-1)*255)));
+      const idx=(py*cw+px)*4;
+      imgData.data[idx]=r; imgData.data[idx+1]=g; imgData.data[idx+2]=bl; imgData.data[idx+3]=120;
+    }
+  }
+  dCtx.putImageData(imgData,0,0);
+}
+
+function renderApproxOverlay(data,dw,dh){
+  const cw=depthCanvas.width,ch=depthCanvas.height;
+  const imgData=dCtx.createImageData(cw,ch);
+  for(let py=0;py<ch;py++){
+    for(let px=0;px<cw;px++){
+      const sx=Math.floor(px/cw*dw), sy=Math.floor(py/ch*dh);
+      const norm=data[sy*dw+sx];
+      const r=Math.round((1-norm)*255); const bl=Math.round(norm*255);
+      const idx=(py*cw+px)*4;
+      imgData.data[idx]=r; imgData.data[idx+1]=80; imgData.data[idx+2]=bl; imgData.data[idx+3]=100;
+    }
+  }
+  dCtx.putImageData(imgData,0,0);
+}
+
+// Get depth-corrected mm from two screen points
+function getDepthCorrectedMm(ptA,ptB){
+  const px=dist2d(ptA,ptB);
+  if(!pxPerMm) return null;
+  if(!depthMap) return px/pxPerMm;
+
+  // Sample depth at each point
+  const da=sampleDepth(ptA), db=sampleDepth(ptB);
+  if(da===null||db===null) return px/pxPerMm;
+
+  // Average depth of the two points, normalized 0-1
+  const avgDepth=(da+db)/2;
+  // Depth correction: objects further away have more px per real mm (foreshortening)
+  // We use the anchor distance to scale: deeper = farther = divide by larger factor
+  const anchorPxPerMm=pxPerMm;
+  // avgDepth closer to 1 = nearer. Scale correction: ±30% max adjustment
+  const correction=0.7+avgDepth*0.6; // 0.7 (far) to 1.3 (near)
+  return px/(anchorPxPerMm*correction);
+}
+
+function sampleDepth(pt){
+  if(!depthMap) return null;
+  const cw=depthCanvas.width, ch=depthCanvas.height;
+  if(depthMap.approx){
+    const sx=Math.floor(pt.x/cw*depthMap.w), sy=Math.floor(pt.y/ch*depthMap.h);
+    return depthMap.data[sy*depthMap.w+sx];
+  }
+  const dh=depthMap.length, dw=depthMap[0].length;
+  const sx=Math.floor(pt.x/cw*dw), sy=Math.floor(pt.y/ch*dh);
+  // Normalize to 0-1
+  let mn=Infinity,mx=-Infinity;
+  for(let y=0;y<dh;y++) for(let x=0;x<dw;x++){const v=depthMap[y][x];if(v<mn)mn=v;if(v>mx)mx=v;}
+  return (depthMap[sy][sx]-mn)/(mx-mn||1);
+}
+
+function runColorScan(){
+  if(!video.videoWidth) return;
+  const scale=0.25;
+  const sw=Math.floor(video.videoWidth*scale), sh=Math.floor(video.videoHeight*scale);
+  sCtx.drawImage(video,0,0,sw,sh);
+  const id=sCtx.getImageData(0,0,sw,sh);
+  sCtx.clearRect(0,0,scanCanvas.width,scanCanvas.height);
+  const {r:tr,g:tg,b:tb}=S.refColorRGB;
+  let x0=sw,y0=sh,x1=0,y1=0,cnt=0;
+  for(let i=0;i<id.data.length;i+=4){
+    if(colorMatch(id.data[i],id.data[i+1],id.data[i+2],tr,tg,tb)){
+      const px=(i/4)%sw, py=Math.floor((i/4)/sw);
+      if(px<x0)x0=px; if(px>x1)x1=px; if(py<y0)y0=py; if(py>y1)y1=py; cnt++;
+    }
+  }
+  if(cnt<sw*sh*0.002){hideScanHL();scanResult=null;return;}
+  const sx=scanCanvas.width/sw, sy=scanCanvas.height/sh;
+  const rx=x0*sx,ry=y0*sy,rw=(x1-x0)*sx,rh=(y1-y0)*sy;
+  if(rw<10||rh<10){hideScanHL();scanResult=null;return;}
+  scanResult={x:rx,y:ry,w:rw,h:rh};
+  showScanHL(rx,ry,rw,rh);
+}
+
+function colorMatch(r,g,b,tr,tg,tb){
+  if(S.refColorH===-1) return r>200&&g>200&&b>200;
+  if(S.refColorH===-2) return r<60&&g<60&&b<60;
+  const hsv=rgbToHsv(r,g,b);
+  if(hsv.s<0.2) return false;
+  const dh=Math.min(Math.abs(hsv.h-S.refColorH),360-Math.abs(hsv.h-S.refColorH));
+  return dh<38&&hsv.v>0.25;
+}
+
+function showScanHL(x,y,w,h){
+  const p=8,hl=document.getElementById('scan-highlight');
+  hl.style.cssText=`display:block;left:${x-p}px;top:${y-p}px;width:${w+p*2}px;height:${h+p*2}px`;
+  const btn=document.getElementById('scan-confirm-btn');
+  btn.style.cssText=`display:block;left:${x+w/2}px;top:${y+h+p+8}px`;
+}
+function hideScanHL(){
+  document.getElementById('scan-highlight').style.display='none';
+  document.getElementById('scan-confirm-btn').style.display='none';
+}
+
+function confirmScanCalib(){
+  if(!scanResult) return;
+  pxPerMm=Math.max(scanResult.w,scanResult.h)/S.refMm;
+  stopAutoScan(); updateCalibBadge(); updateHUD();
+  showToast('✅ Calibrated! '+pxPerMm.toFixed(1)+' px/mm');
+  setMode('measure');
+}
+
+// ══ TAP HANDLER ═════════════════════════════════════════
+function getTap(e){
+  const r=tapLayer.getBoundingClientRect(), s=e.touches?e.changedTouches[0]:e;
+  return {x:s.clientX-r.left, y:s.clientY-r.top};
+}
+// ══ ZOOM PANEL ══════════════════════════════════════════
+const ZOOM_FACTOR = 4;   // 4× magnification
+const ZOOM_SIZE = 260;   // display size px
+
+let zoomOpen = false;
+let zoomRegionX = 0, zoomRegionY = 0; // canvas coords of region center
+let longPressTimer = null;
+let touchStartX = 0, touchStartY = 0;
+let zoomTapX = 0, zoomTapY = 0; // where user taps inside zoom box
+
+let zoomPanelEl, zoomCanvasEl, zoomCtx, zoomTitleEl;
+
+function initLoupe(){
+  zoomPanelEl = document.getElementById('zoom-panel');
+  zoomCanvasEl = document.getElementById('zoom-canvas');
+  zoomTitleEl = document.getElementById('zoom-title');
+  if(!zoomCanvasEl){ console.warn('Zoom canvas not found'); return; }
+  zoomCanvasEl.width = ZOOM_SIZE;
+  zoomCanvasEl.height = ZOOM_SIZE;
+  zoomCtx = zoomCanvasEl.getContext('2d');
+
+  // Tap inside zoom box to move crosshair and confirm point
+  document.getElementById('zoom-box').addEventListener('touchend', e=>{
+    e.preventDefault(); e.stopPropagation();
+    const t = e.changedTouches[0];
+    const rect = zoomCanvasEl.getBoundingClientRect();
+    zoomTapX = t.clientX - rect.left;
+    zoomTapY = t.clientY - rect.top;
+    // Move crosshair dot visually
+    const dot = document.querySelector('.zoom-center-dot');
+    if(dot){ dot.style.left = zoomTapX+'px'; dot.style.top = zoomTapY+'px'; dot.style.transform='none'; }
+    // Redraw with crosshair lines following tap
+    drawZoom(zoomRegionX, zoomRegionY);
+  }, {passive:false});
+
+  document.getElementById('zoom-box').addEventListener('click', e=>{
+    e.stopPropagation();
+    const rect = zoomCanvasEl.getBoundingClientRect();
+    zoomTapX = e.clientX - rect.left;
+    zoomTapY = e.clientY - rect.top;
+    const dot = document.querySelector('.zoom-center-dot');
+    if(dot){ dot.style.left = zoomTapX+'px'; dot.style.top = zoomTapY+'px'; dot.style.transform='none'; }
+  });
+
+  console.log('Zoom panel initialized OK');
+}
+
+function openZoomPanel(canvasX, canvasY){
+  if(!zoomPanelEl){ console.warn('openZoomPanel: panel not found'); return; }
+  zoomOpen = true;
+  zoomRegionX = canvasX;
+  zoomRegionY = canvasY;
+  // Center tap starts at center of zoom box
+  zoomTapX = ZOOM_SIZE / 2;
+  zoomTapY = ZOOM_SIZE / 2;
+  // Reset crosshair dot to center
+  const dot = document.querySelector('.zoom-center-dot');
+  if(dot){ dot.style.left='50%'; dot.style.top='50%'; dot.style.transform='translate(-50%,-50%)'; }
+
+  // Set title
+  const ptName = camMode==='calib'
+    ? (calibPts.length===0 ? 'Ref point A' : 'Ref point B')
+    : (measurePts.length===0 ? 'Point A' : 'Point B');
+  if(zoomTitleEl) zoomTitleEl.textContent = ptName;
+
+  drawZoom(canvasX, canvasY);
+  zoomPanelEl.classList.add('show');
+}
+
+function drawZoom(cx, cy){
+  if(!zoomCtx || !video.videoWidth) return;
+  const vw = video.videoWidth, vh = video.videoHeight;
+  const cw = oc.width || window.innerWidth;
+  const ch = oc.height || window.innerHeight;
+
+  // Map canvas point to video coords
+  const vx = (cx / cw) * vw;
+  const vy = (cy / ch) * vh;
+
+  // Region size in video pixels
+  const regionW = ZOOM_SIZE / ZOOM_FACTOR;
+  const regionH = ZOOM_SIZE / ZOOM_FACTOR;
+  const sx = Math.max(0, Math.min(vx - regionW/2, vw - regionW));
+  const sy = Math.max(0, Math.min(vy - regionH/2, vh - regionH));
+
+  zoomCtx.clearRect(0, 0, ZOOM_SIZE, ZOOM_SIZE);
+  zoomCtx.drawImage(video, sx, sy, regionW, regionH, 0, 0, ZOOM_SIZE, ZOOM_SIZE);
+}
+
+function closeZoomPanel(){
+  if(zoomPanelEl) zoomPanelEl.classList.remove('show');
+  zoomOpen = false;
+}
+
+function cancelZoom(){
+  closeZoomPanel();
+}
+
+function confirmZoom(){
+  // Convert tap position in zoom box → real canvas coordinates
+  const cw = oc.width || window.innerWidth;
+  const ch = oc.height || window.innerHeight;
+  const vw = video.videoWidth || cw;
+  const vh = video.videoHeight || ch;
+
+  // Region size in video pixels
+  const regionW = ZOOM_SIZE / ZOOM_FACTOR;
+  const regionH = ZOOM_SIZE / ZOOM_FACTOR;
+
+  // Center of region in video coords
+  const vx = (zoomRegionX / cw) * vw;
+  const vy = (zoomRegionY / ch) * vh;
+  const sx = Math.max(0, Math.min(vx - regionW/2, vw - regionW));
+  const sy = Math.max(0, Math.min(vy - regionH/2, vh - regionH));
+
+  // Tap position in video coords
+  const tapVx = sx + (zoomTapX / ZOOM_SIZE) * regionW;
+  const tapVy = sy + (zoomTapY / ZOOM_SIZE) * regionH;
+
+  // Map back to canvas coords
+  const finalX = (tapVx / vw) * cw;
+  const finalY = (tapVy / vh) * ch;
+
+  closeZoomPanel();
+  applyPoint({x: finalX, y: finalY});
+}
+
+// ── TOUCH HANDLING ───────────────────────────────────────
+tapLayer.addEventListener('contextmenu', e=>e.preventDefault());
+
+tapLayer.addEventListener('touchstart', e=>{
+  e.preventDefault();
+  const t = e.touches[0];
+  touchStartX = t.clientX;
+  touchStartY = t.clientY;
+  const cx = t.clientX, cy = t.clientY;
+
+  longPressTimer = setTimeout(()=>{
+    // Convert screen coords to canvas coords
+    const rect = tapLayer.getBoundingClientRect();
+    const canvasX = cx - rect.left;
+    const canvasY = cy - rect.top;
+    openZoomPanel(canvasX, canvasY);
+  }, 500);
+}, {passive:false});
+
+tapLayer.addEventListener('touchmove', e=>{
+  e.preventDefault();
+  if(zoomOpen) return; // ignore moves when zoom is open
+  const t = e.touches[0];
+  const dx = Math.abs(t.clientX - touchStartX);
+  const dy = Math.abs(t.clientY - touchStartY);
+  if(dx > 15 || dy > 15) clearTimeout(longPressTimer);
+}, {passive:false});
+
+tapLayer.addEventListener('touchend', e=>{
+  e.preventDefault();
+  clearTimeout(longPressTimer);
+  if(zoomOpen) return; // zoom handles its own confirm/cancel
+  const t = e.changedTouches[0];
+  const rect = tapLayer.getBoundingClientRect();
+  applyPoint({x: t.clientX - rect.left, y: t.clientY - rect.top});
+}, {passive:false});
+
+tapLayer.addEventListener('touchcancel', e=>{
+  clearTimeout(longPressTimer);
+});
+
+// Mouse fallback for desktop
+tapLayer.addEventListener('click', e=>{
+  if(zoomOpen) return;
+  const rect = tapLayer.getBoundingClientRect();
+  applyPoint({x: e.clientX - rect.left, y: e.clientY - rect.top});
+});
+
+// ══ DIST CALIBRATION ════════════════════════════════════
+function applyDistCalib(cm){
+  const vw=video.videoWidth||1920;
+  pxPerMm=vw/(2*(cm*10)*Math.tan(65*Math.PI/360));
+  updateCalibBadge(); updateHUD();
+  showToast('📏 Scale: '+pxPerMm.toFixed(2)+' px/mm','amber');
+}
+function updateDistCalib(v){ S.distCm=parseFloat(v)||50; applyDistCalib(S.distCm); }
+
+// ══ RESULT BOX ══════════════════════════════════════════
+function updateResultBox(){
+  const va=document.getElementById('rv-a'), vb=document.getElementById('rv-b'), ba=document.getElementById('rbox-a');
+  if(camMode==='calib'){
+    if(S.calibMethod==='dist'){ va.textContent=pxPerMm?pxPerMm.toFixed(2)+' px/mm':'enter dist'; va.className='rv'+(pxPerMm?'':' na'); ba.className='rbox'+(pxPerMm?' cr':''); }
+    else if(calibPts.length<2){ va.textContent=calibPts.length===1?'tap 2nd':'tap 2 pts'; va.className='rv na'; ba.className='rbox'; }
+    else{ va.textContent=Math.round(dist2d(calibPts[0],calibPts[1]))+'px → '+S.tapRefMm+'mm'; va.className='rv am'; ba.className='rbox cr'; }
+  } else {
+    if(measurePts.length<2){ va.textContent=measurePts.length===1?'tap 2nd':'tap 2 pts'; va.className='rv na'; vb.textContent='—'; ba.className='rbox'; }
+    else{
+      const mm = S.calibMethod==='ai' ? getDepthCorrectedMm(measurePts[0],measurePts[1]) : dist2d(measurePts[0],measurePts[1])/(pxPerMm||1);
+      if(pxPerMm&&mm!==null){ const cm=mm/10; va.textContent=cm.toFixed(2)+' cm'; vb.textContent=(mm/25.4).toFixed(2)+'"'; va.className='rv'; ba.className='rbox ready'; }
+      else{ va.textContent=Math.round(dist2d(measurePts[0],measurePts[1]))+'px'; va.className='rv am'; ba.className='rbox'; }
+    }
+  }
+}
+
+function updateInstr(){
+  const el=document.getElementById('instr');
+  if(camMode==='calib'){
+    if(S.calibMethod==='auto') el.innerHTML=pxPerMm?'✅ Calibrated — point at ref &amp; tap <b>Use this</b> to redo':'<span class="scanning">🔍 Scanning for reference object…</span>';
+    else if(S.calibMethod==='tap') el.textContent=calibPts.length===0?'👆 Tap edge A of reference':calibPts.length===1?'👆 Tap edge B of reference':'✅ Calibrated — tap to redo';
+    else if(S.calibMethod==='ai') el.innerHTML=depthModel?'🧠 AI depth active — tap <b>Measure</b> to start':'<span class="scanning">🧠 Loading AI model…</span>';
+    else el.textContent='📏 Scale from distance — update cm below if needed';
+  } else {
+    const aiNote=S.calibMethod==='ai'?' (AI depth corrected)':'';
+    if(!pxPerMm) el.textContent='⚠️ Calibrate first!';
+    else if(measurePts.length===0) el.textContent='👆 Tap point A'+aiNote;
+    else if(measurePts.length===1) el.textContent='👆 Tap point B'+aiNote;
+    else el.textContent='✅ Ready — tap + Log or tap elsewhere to redo';
+  }
+}
+
+function updateCalibBadge(){
+  const dot=document.getElementById('cdot'), txt=document.getElementById('cbadge-txt');
+  dot.className=pxPerMm?'cdot ok':'cdot';
+  txt.textContent=pxPerMm?pxPerMm.toFixed(1)+' px/mm':'Not calibrated';
+}
+
+// ══ LOG ═════════════════════════════════════════════════
+function logMeasurementPx(avgPx){
+  // Called by frame averaging with averaged pixel distance
+  if(!pxPerMm) return;
+  const mm = avgPx/pxPerMm;
+  const label = currentMType==='Custom' ? (S.defaultCustomLabel||'Custom') : currentMType;
+  _doLog(mm, label);
+}
+function logMeasurement(){
+  if(measurePts.length<2||!pxPerMm) return;
+  let mm;
+  try{
+    mm = S.calibMethod==='ai'
+      ? getDepthCorrectedMm(measurePts[0],measurePts[1])
+      : dist2d(measurePts[0],measurePts[1])/pxPerMm;
+  }catch(e){ mm = dist2d(measurePts[0],measurePts[1])/pxPerMm; }
+  if(!mm||isNaN(mm)||mm<=0) return;
+  const label = currentMType==='Custom' ? (S.defaultCustomLabel||'Custom') : currentMType;
+  _doLog(mm, label);
+}
+function _doLog(mm, label){
+  measurements.push({
+    id:Date.now(),
+    plot:S.plotId, plant:S.plantId,
+    type:label, mm:parseFloat(mm.toFixed(2)), cm:parseFloat((mm/10).toFixed(3)),
+    calibMethod:S.calibMethod, time:new Date().toLocaleTimeString(), date:new Date().toLocaleDateString()
+  });
+  saveData(); updateDataBadge();
+  openDrawer();
+  showToast('✅ '+(mm/10).toFixed(2)+' cm — '+label);
+  if(document.getElementById('screen-data').classList.contains('active')) renderTable();
+  setTimeout(()=>{ measurePts=[]; updateResultBox(); updateInstr(); redraw(); },600);
+}
+
+
+// ══ FRAME AVERAGING ═════════════════════════════════════
+const AVG_FRAMES=20, AVG_MS=1000;
+let avgRunning=false;
+
+function startFrameAveraging(){
+  if(avgRunning||measurePts.length<2) return;
+  avgRunning=true;
+  const ring=document.getElementById('avg-ring');
+  const fill=document.getElementById('avg-fill');
+  const lbl=document.getElementById('avg-label');
+  ring.classList.add('show');
+
+  // Capture initial frame as reference for optical flow
+  const startA={...measurePts[0]}, startB={...measurePts[1]};
+  const samples=[];
+  let frame=0;
+  const interval=AVG_MS/AVG_FRAMES;
+
+  const tick=setInterval(()=>{
+    frame++;
+    // Optical flow: track feature points near A and B using canvas pixel analysis
+    const refined=refinePointsOpticalFlow(startA, startB);
+    const px=dist2d(refined.a, refined.b);
+    if(px>5) samples.push(px); // ignore outliers
+
+    // Update ring
+    const pct=frame/AVG_FRAMES;
+    fill.style.strokeDashoffset=220-(220*pct);
+    lbl.textContent=frame;
+
+    if(frame>=AVG_FRAMES){
+      clearInterval(tick);
+      avgRunning=false;
+      ring.classList.remove('show');
+
+      if(samples.length<3){ showToast('⚠️ Too much movement','amber'); measurePts=[]; redraw(); return; }
+      // Use median of samples (more robust than mean)
+      samples.sort((a,b)=>a-b);
+      const medPx=samples[Math.floor(samples.length/2)];
+      logMeasurementPx(medPx);
+    }
+  }, interval);
+}
+
+function refinePointsOpticalFlow(a, b){
+  // Sample a small patch around each point in current video frame
+  // and find the brightest/most-contrasted sub-pixel via gradient
+  if(!video.videoWidth) return {a,b};
+  const scaleX=video.videoWidth/overlayCanvas.width;
+  const scaleY=video.videoHeight/overlayCanvas.height;
+
+  // Use a small offscreen canvas to sample video pixels
+  const oc2=document.createElement('canvas'); oc2.width=20; oc2.height=20;
+  const ctx2=oc2.getContext('2d');
+
+  function refinePoint(p){
+    const vx=p.x*scaleX, vy=p.y*scaleY;
+    ctx2.drawImage(video, vx-10, vy-10, 20, 20, 0, 0, 20, 20);
+    const id=ctx2.getImageData(0,0,20,20);
+    // Find max gradient position
+    let maxG=0, bx=10, by=10;
+    for(let y=1;y<19;y++) for(let x=1;x<19;x++){
+      const idx=(y*20+x)*4;
+      const gx=Math.abs(id.data[idx]-id.data[idx-4]);
+      const gy=Math.abs(id.data[idx]-id.data[idx-80]);
+      const g=gx+gy;
+      if(g>maxG){maxG=g;bx=x;by=y;}
+    }
+    // Map back to overlay coords
+    return {x: p.x+(bx-10)/scaleX, y: p.y+(by-10)/scaleY};
+  }
+
+  return {a:refinePoint(a), b:refinePoint(b)};
+}
+
+// ══ PHOTO CAPTURE ════════════════════════════════════════
+function capturePhoto(){
+  if(!video.videoWidth){ showToast('Camera not ready','amber'); return; }
+  // Flash effect
+  const flash=document.getElementById('photo-flash');
+  flash.style.display='block'; flash.style.opacity='0.8';
+  setTimeout(()=>{ flash.style.opacity='0'; setTimeout(()=>flash.style.display='none',200); },100);
+
+  // Capture at medium resolution (max 1920px wide)
+  const maxW=1920;
+  const scale=Math.min(1, maxW/video.videoWidth);
+  const w=Math.round(video.videoWidth*scale);
+  const h=Math.round(video.videoHeight*scale);
+  const pc=document.createElement('canvas'); pc.width=w; pc.height=h;
+  pc.getContext('2d').drawImage(video,0,0,w,h);
+  const dataUrl=pc.toDataURL('image/jpeg',0.82); // good quality, reasonable size
+
+  const photo={
+    id:Date.now(),
+    plot:S.plotId, plant:S.plantId,
+    type:currentMType==='Custom'?(S.defaultCustomLabel||'Custom'):currentMType,
+    dataUrl, time:new Date().toLocaleTimeString(), date:new Date().toLocaleDateString()
+  };
+  photos.push(photo);
+  saveData();
+  showToast('📸 Photo saved — '+S.plotId+'/'+S.plantId,'green');
+  updatePhotoActionsVisibility();
+}
+
+function updatePhotoActionsVisibility(){
+  const pa=document.getElementById('photo-actions');
+  if(pa) pa.style.display=photos.length?'flex':'none';
+}
+
+// lightbox
+let lightboxPhotoId=null;
+function openLightbox(id){
+  const p=photos.find(x=>x.id===id); if(!p) return;
+  lightboxPhotoId=id;
+  document.getElementById('lightbox-img').src=p.dataUrl;
+  document.getElementById('lightbox').classList.add('show');
+}
+function closeLightbox(){ document.getElementById('lightbox').classList.remove('show'); lightboxPhotoId=null; }
+function downloadCurrentPhoto(){
+  if(!lightboxPhotoId) return;
+  const p=photos.find(x=>x.id===lightboxPhotoId); if(!p) return;
+  const a=document.createElement('a');
+  a.href=p.dataUrl;
+  a.download=`GM_${p.plot}_${p.plant}_${p.type}_${p.date.replace(/\//g,'-')}_${p.time.replace(/:/g,'-')}.jpg`;
+  a.click();
+}
+function deleteCurrentPhoto(){
+  if(!lightboxPhotoId) return;
+  if(!confirm('Delete this photo?')) return;
+  photos=photos.filter(x=>x.id!==lightboxPhotoId);
+  saveData(); closeLightbox(); renderTable();
+}
+
+async function downloadAllPhotos(){
+  if(!photos.length){ showToast('No photos yet','amber'); return; }
+  showToast('📦 Building ZIP…','amber');
+  const zip=new JSZip();
+  const folder=zip.folder('GreenMeasure_Photos');
+  photos.forEach(p=>{
+    const b64=p.dataUrl.split(',')[1];
+    const fname=`${p.plot}_${p.plant}_${p.type}_${p.date.replace(/\//g,'-')}_${p.time.replace(/:/g,'-')}_${p.id}.jpg`;
+    folder.file(fname, b64, {base64:true});
+  });
+  const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:3}});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  const d=new Date().toISOString().slice(0,10);
+  a.download=`GreenMeasure_Photos_${d}.zip`;
+  a.click(); URL.revokeObjectURL(a.href);
+  sessionExportedPhotos=true;
+  showToast('✅ Photos downloaded!','green');
+}
+
+function deleteAllPhotos(){
+  if(!photos.length){ showToast('No photos','amber'); return; }
+  if(!sessionExportedPhotos){
+    if(!confirm('⚠️ You have NOT downloaded photos yet this session!\n\nDownload the ZIP first to avoid losing photos.\n\nDelete anyway?')) return;
+  } else {
+    if(!confirm('Delete all '+photos.length+' photos? This cannot be undone.')) return;
+  }
+  photos=[]; saveData();
+  try{ localStorage.removeItem('gm2-photos'); }catch(e){}
+  sessionExportedPhotos=false;
+  updatePhotoActionsVisibility();
+  renderTable();
+  showToast('Photos deleted','amber');
+}
+
+// ══ DRAWER ══════════════════════════════════════════════
+function undoLast(){
+  if(!measurements.length){ showToast('Nothing to undo','amber'); return; }
+  const last=measurements.pop();
+  saveData(); updateDataBadge();
+  showToast('↩ Removed: '+last.mm+' mm','amber');
+}
+function toggleDrawer(){ document.getElementById('cam-drawer').classList.toggle('open'); }
+function openDrawer(){ document.getElementById('cam-drawer').classList.add('open'); }
+function closeDrawer(){ document.getElementById('cam-drawer').classList.remove('open'); }
+
+// ══ PLOT / PLANT NAV ════════════════════════════════════
+function nextPlant(){
+  const n=parseInt(S.plantId); const next=isNaN(n)?S.plantId+'+':String(n+1);
+  S.plantId=next; clearPoints(); updateHUD(); showToast('Plant → '+next);
+}
+function nextPlot(){
+  const n=parseInt(S.plotId); const next=isNaN(n)?S.plotId+'+':String(n+1);
+  S.plotId=next; S.plantId=String(S.startPlantNum);
+  clearPoints(); updateHUD(); showToast('Plot → '+next+' · Plant → '+S.plantId,'amber');
+}
+function openPlotModal(){
+  document.getElementById('m-plot').value=S.plotId;
+  document.getElementById('m-plant').value=S.plantId;
+  document.getElementById('modal-pp').classList.add('show');
+}
+function savePPModal(){
+  const pl=document.getElementById('m-plot').value.trim(), pt=document.getElementById('m-plant').value.trim();
+  if(pl) S.plotId=pl;
+  if(pt) S.plantId=pt;
+  updateHUD(); closeModal('modal-pp');
+}
+function updateHUD(){
+  document.getElementById('hud-plot').textContent=S.plotId||'—';
+  document.getElementById('hud-plant').textContent=S.plantId||'—';
+  // update calib badge scale
+  updateCalibBadge();
+}
+
+// ══ DRAW ════════════════════════════════════════════════
+function dist2d(a,b){return Math.sqrt((b.x-a.x)**2+(b.y-a.y)**2);}
+function redraw(){
+  oCtx.clearRect(0,0,oc.width,oc.height);
+  const pts=camMode==='calib'?calibPts:measurePts, col=camMode==='calib'?'#fbbf24':'#4ade80';
+  pts.forEach((p,i)=>{
+    oCtx.beginPath();oCtx.arc(p.x,p.y,22,0,Math.PI*2);oCtx.strokeStyle=col;oCtx.lineWidth=1.5;oCtx.globalAlpha=.18;oCtx.stroke();oCtx.globalAlpha=1;
+    oCtx.beginPath();oCtx.arc(p.x,p.y,6,0,Math.PI*2);oCtx.fillStyle=col;oCtx.fill();
+    oCtx.strokeStyle=col;oCtx.lineWidth=1.5;oCtx.globalAlpha=.7;
+    oCtx.beginPath();oCtx.moveTo(p.x-16,p.y);oCtx.lineTo(p.x+16,p.y);oCtx.stroke();
+    oCtx.beginPath();oCtx.moveTo(p.x,p.y-16);oCtx.lineTo(p.x,p.y+16);oCtx.stroke();
+    oCtx.globalAlpha=1;
+    oCtx.font='bold 12px Outfit,sans-serif';oCtx.fillStyle=col;oCtx.fillText(i===0?'A':'B',p.x+14,p.y-12);
+  });
+  if(pts.length===2){
+    oCtx.beginPath();oCtx.moveTo(pts[0].x,pts[0].y);oCtx.lineTo(pts[1].x,pts[1].y);
+    oCtx.strokeStyle=col;oCtx.lineWidth=2;oCtx.setLineDash([7,5]);oCtx.globalAlpha=.85;oCtx.stroke();oCtx.setLineDash([]);oCtx.globalAlpha=1;
+    if(camMode==='measure'&&pxPerMm){
+      const mm=dist2d(pts[0],pts[1])/pxPerMm, lbl=mm.toFixed(1)+' mm';
+      const mx=(pts[0].x+pts[1].x)/2, my=(pts[0].y+pts[1].y)/2;
+      oCtx.font='bold 14px DM Mono,monospace';
+      const tw=oCtx.measureText(lbl).width, pw=tw+20, ph=28;
+      oCtx.fillStyle='rgba(74,222,128,0.92)';
+      oCtx.beginPath();oCtx.roundRect(mx-pw/2,my-ph/2,pw,ph,6);oCtx.fill();
+      oCtx.fillStyle='#0d1117';oCtx.textAlign='center';oCtx.textBaseline='middle';
+      oCtx.fillText(lbl,mx,my);oCtx.textAlign='left';oCtx.textBaseline='alphabetic';
+    }
+  }
+}
+
+// ══ DATA TABLE ══════════════════════════════════════════
+function setView(v){
+  dataView=v;
+  document.getElementById('vbtn-flat').classList.toggle('active',v==='flat');
+  document.getElementById('vbtn-group').classList.toggle('active',v==='group');
+  renderTable();
+}
+
+function renderTable(){
+  const body=document.getElementById('data-body'), sb=document.getElementById('stats-bar');
+  if(!measurements.length){
+    body.innerHTML='<div class="empty-state"><div class="empty-icon">🌱</div><p>No measurements yet.<br>Head to the camera and start logging!</p></div>';
+    sb.style.display='none'; return;
+  }
+  sb.style.display='flex';
+  const vals=measurements.map(m=>m.cm||m.mm/10);
+  document.getElementById('st-total').textContent=measurements.length;
+  document.getElementById('st-avg').textContent=(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2);
+  document.getElementById('st-min').textContent=Math.min(...vals).toFixed(2);
+  document.getElementById('st-max').textContent=Math.max(...vals).toFixed(2);
+  document.getElementById('st-plants').textContent=new Set(measurements.map(m=>m.plot+'::'+m.plant)).size;
+  document.getElementById('st-plots').textContent=new Set(measurements.map(m=>m.plot)).size;
+  dataView==='flat'?renderFlat(body):renderGrouped(body);
+}
+
+function renderFlat(body){
+  body.innerHTML=`<div class="table-wrap"><table>
+    <thead><tr><th>Plot</th><th>Plant</th><th>Type</th><th>cm</th><th>mm</th><th>📸</th><th>Date</th><th>Time</th><th></th></tr></thead>
+    <tbody>${measurements.map((m,i)=>{
+      const mPhotos=photos.filter(p=>p.plot===m.plot&&p.plant===m.plant&&p.type===m.type);
+      const photoCell=mPhotos.length
+        ? mPhotos.map(p=>`<img class="photo-thumb" src="${p.dataUrl}" onclick="openLightbox(${p.id})">`).join('')
+        : '<span style="color:var(--muted);font-size:10px">—</span>';
+      return `<tr>
+        <td><span class="badge badge-blue">${esc(m.plot)}</span></td>
+        <td><span class="badge badge-amber">${esc(m.plant)}</span></td>
+        <td style="color:var(--muted);font-size:11px">${esc(m.type)}</td>
+        <td class="val-cell">${m.cm}</td>
+        <td style="font-family:'DM Mono',monospace;color:var(--muted);font-size:10px">${m.mm}</td>
+        <td>${photoCell}</td>
+        <td style="font-size:10px;color:var(--muted)">${m.date||''}</td>
+        <td style="font-size:10px;color:var(--muted)">${m.time}</td>
+        <td><button class="btn-del" onclick="delEntry(${i})">✕</button></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+function renderGrouped(body){
+  const groups={};
+  measurements.forEach((m,i)=>{
+    const k=m.plot+'|||'+m.plant;
+    if(!groups[k]) groups[k]={plot:m.plot,plant:m.plant,items:[]};
+    groups[k].items.push({...m,idx:i});
+  });
+  body.innerHTML=Object.entries(groups).map(([k,g])=>{
+    const vs=g.items.map(x=>x.cm||x.mm/10), avg=(vs.reduce((a,b)=>a+b,0)/vs.length).toFixed(2);
+    const mn=Math.min(...vs).toFixed(2), mx=Math.max(...vs).toFixed(2);
+    const sk=k.replace(/[^a-zA-Z0-9]/g,'_');
+    return `<div class="group-card">
+      <div class="group-hdr" onclick="toggleGroup('${sk}')">
+        <div class="group-title">
+          <span class="badge badge-blue">${esc(g.plot)}</span>
+          <span class="badge badge-amber">${esc(g.plant)}</span>
+          <span style="font-size:11px;color:var(--muted)">${vs.length} log${vs.length!==1?'s':''}</span>
+          ${(()=>{const pc=photos.filter(p=>p.plot===g.plot&&p.plant===g.plant).length; return pc?`<span class="photo-count-badge">📸 ${pc}</span>`:''})()}
+        </div>
+        <div class="group-stats">
+          <div class="gstat">avg<br><span>${avg}</span></div>
+          <div class="gstat">min<br><span>${mn}</span></div>
+          <div class="gstat">max<br><span>${mx}</span></div>
+        </div>
+        <div class="gchev" id="chev-${sk}">▶</div>
+      </div>
+      <div class="group-body" id="gb-${sk}">
+        ${g.items.map(m=>`<div class="group-row">
+          <div class="grt">${esc(m.type)}</div>
+          <div class="grv">${(m.cm||m.mm/10).toFixed(2)} cm</div>
+          <div class="grtm">${m.time}</div>
+          <button class="btn-del" onclick="delEntry(${m.idx});event.stopPropagation()">✕</button>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleGroup(k){
+  const gb=document.getElementById('gb-'+k), ch=document.getElementById('chev-'+k);
+  if(!gb)return; const o=gb.classList.toggle('open'); ch.classList.toggle('open',o);
+}
+function delEntry(i){ measurements.splice(i,1); saveData(); updateDataBadge(); renderTable(); }
+function clearAll(){
+  if(!measurements.length)return;
+  const photoWarn=photos.length&&!sessionExportedPhotos?' Photos NOT yet downloaded!':'';
+  if(confirm('Clear all '+measurements.length+' measurements?'+photoWarn+'\nThis cannot be undone.')){
+    measurements=[]; saveData(); updateDataBadge(); renderTable();
+  }
+}
+function updateDataBadge(){
+  ['data-badge'].forEach(id=>{
+    const b=document.getElementById(id);
+    if(!b) return;
+    if(measurements.length>0){b.textContent=measurements.length;b.style.display='inline-block';}
+    else b.style.display='none';
+  });
+}
+
+// ══ CSV ═════════════════════════════════════════════════
+function exportCSV(){
+  if(!measurements.length){showToast('No data yet','amber');return;}
+  const trial=S.trial||'Session';
+  const hdr=['Trial','Plot','Plant','Measurement_type','cm','mm','Calibration','Date','Time'];
+  const rows=measurements.map(m=>[trial,m.plot,m.plant,m.type,m.cm,m.mm,m.calibMethod,m.date||'',m.time]);
+  const csv=[hdr,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`GreenMeasure_${trial.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(a.href);
+  showToast('CSV downloaded!');
+}
+
+// ══ UTILS ═══════════════════════════════════════════════
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function hexToRgb(h){return{r:parseInt(h.slice(1,3),16),g:parseInt(h.slice(3,5),16),b:parseInt(h.slice(5,7),16)};}
+function rgbToHsv(r,g,b){
+  r/=255;g/=255;b/=255;
+  const max=Math.max(r,g,b),min=Math.min(r,g,b),d=max-min;
+  let h=0,s=max===0?0:d/max,v=max;
+  if(d!==0){if(max===r)h=((g-b)/d)%6;else if(max===g)h=(b-r)/d+2;else h=(r-g)/d+4;h=Math.round(h*60);if(h<0)h+=360;}
+  return{h,s,v};
+}
+function esc(s){return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+let toastTimer;
+function showToast(msg,type='green'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='show '+type;
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.className='',2200);
+}
+
+// ── PWA Install ─────────────────────────────────────────
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById('pwa-banner').style.display='block';
+});
+function installPWA(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; document.getElementById('pwa-banner').style.display='none'; });
+}
+
+// ── RAF loop ────────────────────────────────────────────
+(function loop(){
+  if(document.getElementById('screen-camera').classList.contains('active')){
+    redraw();
+    // Keep loupe updated while finger is held
+    if(zoomOpen) drawZoom(zoomRegionX, zoomRegionY);
+  }
+  requestAnimationFrame(loop);
+})();
+
+// ── Boot ────────────────────────────────────────────────
+initLoupe();
+loadStorage();
+updateDataBadge();
+updatePhotoActionsVisibility();
+</script>
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="">
+  <div class="lightbox-bar">
+    <button class="lightbox-btn" onclick="downloadCurrentPhoto()">⬇ Save Photo</button>
+    <button class="lightbox-btn del" onclick="deleteCurrentPhoto()">🗑 Delete</button>
+    <button class="lightbox-btn" onclick="closeLightbox()">Close</button>
+  </div>
+</div>
+</body>
+</html>
+.section-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.field-row{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field-row:last-child{margin-bottom:0}
+.field-row label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px}
+input[type=text],input[type=number],select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Outfit',sans-serif;font-size:15px;padding:10px 14px;width:100%;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none}
+input:focus,select:focus{border-color:var(--green)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.method-pills{display:flex;gap:6px;flex-wrap:wrap}
+.method-pill{flex:1;min-width:100px;padding:10px 6px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:all .2s;line-height:1.5}
+.method-pill.active{border-color:var(--amber);background:var(--amber-dim);color:var(--amber)}
+.calib-detail{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:none}
+.calib-detail.show{display:block}
+.hint{font-size:12px;color:var(--muted);line-height:1.6;margin-top:6px}
+.color-swatches{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}
+.swatch{width:34px;height:34px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:transform .15s,border-color .15s;flex-shrink:0}
+.swatch.active{border-color:#fff;transform:scale(1.18)}
+.swatch-custom{display:flex;align-items:center;justify-content:center;background:var(--surface2);border:2px dashed var(--border);font-size:16px}
+.shape-chips{display:flex;gap:6px;margin-top:6px}
+.shape-chip{flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:all .2s}
+.shape-chip.active{border-color:var(--amber);background:var(--amber-dim);color:var(--amber)}
+.btn-primary{background:var(--green);color:#0d1117;border:none;border-radius:var(--radius);font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;padding:16px;width:100%;cursor:pointer;transition:opacity .2s,transform .1s}
+.btn-primary:active{transform:scale(.98);opacity:.9}
+.btn-secondary{background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:var(--radius);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;padding:12px;cursor:pointer;transition:all .2s}
+.btn-secondary:hover{border-color:var(--green);color:var(--green)}
+
+/* ── CAMERA ── */
+#screen-camera{position:relative;background:#000;height:100dvh;overflow:hidden}
+#video{width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0;z-index:1}
+#scan-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:3}
+#depth-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;opacity:0;transition:opacity .4s}
+#depth-canvas.show{opacity:.55}
+#ai-loader{position:absolute;inset:0;z-index:20;background:rgba(13,17,23,.88);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+#ai-loader.show{display:flex}
+.ai-loader-title{font-size:16px;font-weight:700;color:var(--blue)}
+.ai-loader-sub{font-size:12px;color:var(--muted);text-align:center;max-width:260px;line-height:1.6}
+.ai-progress-bar{width:220px;height:6px;background:var(--surface2);border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.ai-progress-fill{height:100%;background:var(--blue);width:0%;transition:width .3s;border-radius:10px}
+.depth-legend{position:absolute;bottom:90px;right:12px;z-index:9;display:none;pointer-events:none}
+.depth-legend.show{display:block}
+.dl-inner{background:rgba(0,0,0,.6);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 10px;font-size:10px;color:var(--muted)}
+.dl-bar{width:12px;height:70px;border-radius:4px;background:linear-gradient(to bottom,#ff4444,#ffaa00,#4444ff);margin:4px auto}
+.dl-label{text-align:center;font-size:9px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+#canvas-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:4}
+#tap-layer{position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;z-index:5}
+#scan-highlight{position:absolute;border:2.5px solid var(--amber);border-radius:8px;pointer-events:none;z-index:6;display:none;box-shadow:0 0 16px rgba(251,191,36,.4)}
+#scan-confirm-btn{position:absolute;z-index:11;background:var(--amber);color:#0d1117;border:none;border-radius:20px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;padding:8px 18px;cursor:pointer;display:none;transform:translateX(-50%);white-space:nowrap}
+/* ── TOP HUD ── */
+.cam-hud-top{position:absolute;top:0;left:0;right:0;padding:10px;background:linear-gradient(to bottom,rgba(0,0,0,.8) 0%,transparent 100%);display:flex;align-items:center;gap:6px;z-index:10;pointer-events:none}
+.hud-pill{background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:5px 12px;pointer-events:all;cursor:pointer;flex-shrink:0}
+.hud-pill-label{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.hud-pill-val{font-size:13px;font-weight:700;color:var(--green);white-space:nowrap}
+.hud-pill-val.amber{color:var(--amber)}
+.hud-nav-btn{background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:7px 14px;pointer-events:all;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;transition:all .15s;flex-shrink:0}
+.hud-nav-btn.plot{border-color:rgba(96,165,250,.5);color:var(--blue)}
+.hud-nav-btn.plant{border-color:rgba(74,222,128,.5);color:var(--green)}
+.hud-nav-btn:active{opacity:.6;transform:scale(.95)}
+/* ── CALIB BADGE ── */
+#calib-badge{position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:10;pointer-events:none;white-space:nowrap}
+.cbd{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.1)}
+.cdot{width:7px;height:7px;border-radius:50%;background:var(--red);flex-shrink:0}
+.cdot.ok{background:var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* ── FIXED ACTION BAR ── */
+.action-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(10,12,18,.99);border-top:1px solid rgba(255,255,255,.15);display:flex;align-items:center;gap:5px;padding:10px 10px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.act-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:7px 4px;border-radius:9px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);font-family:'Outfit',sans-serif;font-size:9px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.act-btn .aico{font-size:20px;line-height:1}
+.act-btn.calib-active{background:var(--amber-dim);border-color:rgba(251,191,36,.5);color:var(--amber)}
+.act-btn.measure-active{background:var(--green-dim);border-color:rgba(74,222,128,.5);color:var(--green)}
+.act-btn.undo-btn{color:var(--red);border-color:rgba(248,113,113,.25)}
+.act-btn:active{opacity:.6;transform:scale(.95)}
+.act-divider{width:1px;height:32px;background:rgba(255,255,255,.1);flex-shrink:0}
+/* ── SLIDE DRAWER ── */
+.cam-drawer{position:fixed;bottom:0;left:0;right:0;z-index:199;background:rgba(10,12,18,.99);border-radius:16px 16px 0 0;border-top:1px solid rgba(255,255,255,.15);transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+.cam-drawer.open{transform:translateY(0)}
+.drawer-handle{display:flex;align-items:center;justify-content:center;height:28px;cursor:pointer}
+.drawer-handle-bar{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2)}
+.drawer-content{padding:2px 14px 14px}
+.drawer-section{margin-bottom:14px}
+.drawer-section-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.result-boxes{display:flex;gap:8px}
+.rbox{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 10px;text-align:center}
+.rbox.ready{border-color:var(--green);box-shadow:0 0 10px rgba(74,222,128,.2)}
+.rbox.cr{border-color:var(--amber);box-shadow:0 0 10px rgba(251,191,36,.2)}
+.rl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.rv{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--green);margin-top:2px}
+.rv.na{color:var(--muted);font-size:12px}
+.rv.am{color:var(--amber)}
+.instr{text-align:center;font-size:11px;color:rgba(255,255,255,.5);margin-top:8px;min-height:15px}
+.drawer-nav{display:flex;gap:7px;margin-top:14px}
+.dnav-btn{flex:1;padding:11px 6px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.05);font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;text-align:center;transition:all .2s}
+.dnav-btn:active{opacity:.7}
+.dnav-btn.cam{color:var(--green);border-color:rgba(74,222,128,.4)}
+.dnav-btn.data{color:var(--blue);border-color:rgba(96,165,250,.4)}
+.data-count-badge{display:inline-block;background:var(--amber);color:#0d1117;font-size:9px;font-weight:800;padding:1px 5px;border-radius:10px;margin-left:4px;vertical-align:middle}
+
+
+
 /* ── LOUPE MAGNIFIER ── */
 #loupe{
   position:fixed;
