@@ -642,14 +642,22 @@ async function startSession(){
   saveProfile();
   try{
     const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920}},audio:false});
+    // Show camera screen FIRST so video element is in the DOM and visible
+    showScreen('camera');
+    updateDataBadge();
     video.srcObject=stream;
+    // onloadedmetadata may fire immediately if already cached, or after a moment
     video.onloadedmetadata=()=>{
       resizeCanvases();
       initCamera();
       if(S.calibMethod==='ai') loadDepthModel();
-      showScreen('camera');
-      updateDataBadge();
     };
+    // Fallback: if metadata doesn't fire in 2s, init anyway
+    setTimeout(()=>{
+      if(!video.videoWidth) return; // not ready yet, let onloadedmetadata handle it
+      resizeCanvases();
+      initCamera();
+    }, 500);
   }catch(e){ alert('Camera access denied. Please allow camera permission and try again.'); return; }
 }
 
